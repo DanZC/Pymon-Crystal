@@ -1,0 +1,55 @@
+{"species": [
+  {"name": "?", "type":["???"],
+    "stats": {"hp": 100, "atk": 100, "def": 100, "spa": 100, "spd": 100, "spe": 100},
+    "learnset":{},
+    "evolution":[],
+    "egg_yield":"?",
+    "egg_group":["UNDISCOVERED"],
+    "gender_ratio":"GENDERLESS",
+    "catch_rate":0
+  },
+  {"name": "BULBASAUR", "type":["GRASS","POISON"],
+    "stats": {"hp": 100, "atk": 100, "def": 100, "spa": 100, "spd": 100, "spe": 100},
+    "learnset":
+    {"0":["TACKLE","GROWL"],
+      "7":["VINEWHIP"]},
+    "evolution":[{"method":"LEVEL","condition":16,"evolved":"IVYSAUR"}],
+    "egg_yield":"BULBASAUR",
+    "egg_group":["MONSTER"],
+    "gender_ratio":"MALE_75%",
+    "catch_rate":45
+  },
+  {"name": "IVYSAUR", "type":["GRASS","POISON"],
+    "stats": {"hp": 100, "atk": 100, "def": 100, "spa": 100, "spd": 100, "spe": 100},
+    "learnset":
+    {"0":["TACKLE","GROWL"],
+      "7":["VINEWHIP"]},
+    "evolution":[{"method":"LEVEL","condition":36,"evolved":"VENUSAUR"}],
+    "egg_yield":"BULBASAUR",
+    "egg_group":["MONSTER"],
+    "gender_ratio":"MALE_75%",
+    "catch_rate":45
+  },
+  {"name": "VENUSAUR", "type":["GRASS","POISON"],
+    "stats": {"hp": 100, "atk": 100, "def": 100, "spa": 100, "spd": 100, "spe": 100},
+    "learnset":
+    {"0":["TACKLE","GROWL"],
+      "7":["VINEWHIP"]},
+    "evolution":[{"method":"LEVEL","condition":36,"evolved":"VENUSAUR"}],
+    "egg_yield":"BULBASAUR",
+    "egg_group":["MONSTER"],
+    "gender_ratio":"MALE_75%",
+    "catch_rate":45
+  },
+  {"name": "CHARMANDER", "type":["FIRE"],
+    "stats": {"hp": 100, "atk": 100, "def": 100, "spa": 100, "spd": 100, "spe": 100},
+    "learnset":
+    {"0":["TACKLE","GROWL"],
+      "7":["VINEWHIP"]},
+    "evolution":[{"method":"LEVEL","condition":36,"evolved":"VENUSAUR"}],
+    "egg_yield":"BULBASAUR",
+    "egg_group":["MONSTER"],
+    "gender_ratio":"MALE_75%",
+    "catch_rate":45
+  }
+]}
