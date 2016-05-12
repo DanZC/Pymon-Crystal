@@ -1,6 +1,6 @@
 import pygame
 import json
-from __main__ import *
+import __main__
 import engine
 
 data_dir = 'Data/'
@@ -8,10 +8,16 @@ data_dir = 'Data/'
 print('Compiling databases...')
 
 me_list = []
-#me_list.append(pygame.mixer.Sound(me_dir + '0.wav'))
+me_list.append(pygame.mixer.Sound(__main__.me_dir + 'get_item.mp3'))
 #me_list.append(pygame.mixer.Sound(me_dir + '1.wav'))
 
 se_list = []
+se_list.append(pygame.mixer.Sound(__main__.sound_dir + 'select.wav'))
+se_list.append(pygame.mixer.Sound(__main__.sound_dir + 'door_enter.wav'))
+se_list.append(pygame.mixer.Sound(__main__.sound_dir + 'door_exit.wav'))
+se_list.append(pygame.mixer.Sound(__main__.sound_dir + 'bump.wav'))
+se_list.append(pygame.mixer.Sound(__main__.sound_dir + 'pc_on.wav'))
+se_list.append(pygame.mixer.Sound(__main__.sound_dir + 'pc_off.wav'))
 
 
 with open(data_dir + 'items.json') as json_data:
