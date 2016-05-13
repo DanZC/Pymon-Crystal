@@ -33,19 +33,21 @@ class TextBox:
         self.ln_1 = ''
         self.ln_2 = ''
         self.ln_3 = ''
-        self.image = pygame.image.load('textboxback.png')
+        self.image = pygame.image.load(__main__.ui_dir + 'textboxback.png')
         self.lines = 1
         self.text_surface_ln_1 = font.render(self.ln_1,False,black,self.image)
         self.text_surface_ln_2 = font.render(self.ln_2,False,black,self.image)
         self.text_surface_ln_3 = font.render(self.ln_3,False,black,self.image)
 
     def draw(self):
-        __main__.gameDisplay.blit(self.image,(0,__main__.display_height - 112))
-        __main__.gameDisplay.blit(self.text_surface_ln_1, (16,__main__.display_height - 96))
-        if self.lines > 1:
-            __main__.gameDisplay.blit(self.text_surface_ln_2, (16, __main__.display_height - (96 - font_size - 8)))
-        if self.lines > 2:
-            __main__.gameDisplay.blit(self.text_surface_ln_3, (16, __main__.display_height - (96 - (font_size*2) - 16)))
+        __main__.gameDisplay.blit(self.image,(0,__main__.display_height - 96))
+        if self.lines < 3:
+            __main__.gameDisplay.blit(self.text_surface_ln_1, (18,__main__.display_height - 64))
+            if self.lines >= 2:
+                __main__.gameDisplay.blit(self.text_surface_ln_2, (18, __main__.display_height - 32))
+        elif self.lines >= 3:
+            __main__.gameDisplay.blit(self.text_surface_ln_2, (18,__main__.display_height - 64))
+            __main__.gameDisplay.blit(self.text_surface_ln_3, (18, __main__.display_height - 32))
 
 
 class Item:
@@ -146,6 +148,7 @@ class PlayerData:
                 if item.name == itm.name:
                     n += 1
             return n
+
     def __init__(self):
         self.name = 'PLAYER'
         self.rival_name = 'RIVAL'
@@ -186,6 +189,9 @@ def show_text(text):
     text = str.replace(text,'{NAME}','%P')
     text = str.replace(text,'{PLAYER}','%P')
     text = str.replace(text,'{RIVAL}','%R')
+    text = str.replace(text,'{poke}','[')
+    text = str.replace(text,"'m","µ")
+    text = str.replace(text,"'s","'")
     for x in range(len(__main__.gameData.vars)):
         text = str.replace(text,'%V' + str(x),str(__main__.gameData.vars[x]))
     for x in range(len(__main__.gameData.flags)):
@@ -348,3 +354,11 @@ def receive_item(item):
     __main__.player.data.bag.add_item(item)
     __main__.loop.run_until_complete(show_text(project.str_list['receive_item'].format(item.name)))
     __main__.loop.run_until_complete(show_text(project.str_list['item_in_bag'].format(item.name,pocket)))
+
+
+@asyncio.coroutine
+def warp(map, x, y):
+    __main__.unload_map()
+    __main__.load_map(map_dir + map + '.tmx')
+    player.x = math.floor(x / block_size)
+    player.y = math.floor(y / block_size)

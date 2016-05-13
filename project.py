@@ -8,7 +8,7 @@ data_dir = 'Data/'
 print('Compiling databases...')
 
 me_list = []
-me_list.append(pygame.mixer.Sound(__main__.me_dir + 'get_item.mp3'))
+me_list.append(pygame.mixer.Sound(__main__.me_dir + 'get_item.wav'))
 #me_list.append(pygame.mixer.Sound(me_dir + '1.wav'))
 
 se_list = []

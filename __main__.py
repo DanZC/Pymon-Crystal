@@ -1,10 +1,25 @@
+music_dir = 'Music/'
+me_dir = 'ME/'
+sound_dir = 'Sounds/'
+map_dir = 'Maps/'
+spr_dir = 'Sprites/'
+ui_dir = 'UI/'
+
 import random
+
 import pygame
+pygame.init()
+pygame.mixer.init(frequency=22050, size=-16, channels=2, buffer=40960)
+music = pygame.mixer.music
+pygame.font.init()
+Time = pygame.time
+clock = pygame.time.Clock()
+
 import pygame.midi
+
 import math
 import time
 from time import time
-import pytmx
 import engine
 import project
 from pytmx.util_pygame import load_pygame
@@ -14,12 +29,6 @@ import asyncio
 
 game_title = ''
 # game_icon = pygame.image.load('icon.png')
-
-music_dir = 'Music/'
-me_dir = 'ME/'
-sound_dir = 'Sounds/'
-map_dir = 'Maps/'
-spr_dir = 'Sprites/'
 
 red = (255, 0, 0)
 blue = (0, 0, 255)
@@ -120,6 +129,18 @@ class Camera:
             gameDisplay.blit(map_base, ((-64*6)-cam.x, (-64*6)-cam.y))
         else:
             gameDisplay.fill(black)
+
+
+class ScreenCover:
+    def __init__(self):
+        self.color = white
+        self.alpha = 255
+        obj_list.append(self)
+
+    def draw(self):
+        color_alpha = (self.color[0],self.color[1],self.color[2],self.alpha)
+        pygame.draw.rect(gameDisplay, color_alpha,[0,0, display_width, display_height])
+
 
 
 class Player:
@@ -248,14 +269,14 @@ class Player:
 
 
 class NPC:
-    def __init__(self, x, y, img='char_ 44_D.png'):
+    def __init__(self, x, y, img='char_ 44_D.png', direction = DIR_DOWN, mv_pattern = engine.mv_pattern_stationary):
         self.x = x
         self.y = y
         self.start_x = x
         self.start_y = y
         self.move_speed = 2
-        self.mv_pattern = engine.mv_pattern_walk
-        self.dir = DIR_DOWN
+        self.mv_pattern = mv_pattern
+        self.dir = direction
         self.radius = 3
         self.isMoving = False
         self.dest_x = self.x
@@ -280,30 +301,44 @@ class NPC:
         #
 
     def update(self):
-        if self.x % block_size == 0 and self.y % block_size == 0:
-            if self.x == self.dest_x and self.y == self.dest_y:
+        if self.mv_pattern != engine.mv_pattern_stationary:
+            if self.mv_pattern == engine.mv_pattern_walk:
+                if self.x % block_size == 0 and self.y % block_size == 0:
+                    if self.x == self.dest_x and self.y == self.dest_y:
+                        n = random.randrange(0,768)
+                        if n <= 3:
+                            self.dir = DIR_UP
+                            if (self.y - block_size) >= self.start_y - (self.radius * block_size):
+                                if get_tile_walkable(self.x, self.y - block_size):
+                                    self.move(0, -1)
+                        elif n <= 6:
+                            self.dir = DIR_DOWN
+                            if (self.y + block_size) <= self.start_y + (self.radius * block_size):
+                                if get_tile_walkable(self.x, self.y + block_size):
+                                    self.move(0, 1)
+                        elif n <= 9:
+                            self.dir = DIR_LEFT
+                            if (self.x - block_size) >= self.start_x - (self.radius * block_size):
+                                if get_tile_walkable(self.x - block_size, self.y):
+                                    self.move(-1,0)
+                        elif n <= 12:
+                            self.dir = DIR_RIGHT
+                            if (self.x + block_size) <= self.start_x + (self.radius * block_size):
+                                if get_tile_walkable(self.x + block_size, self.y):
+                                    self.move(1,0)
+                        else:
+                            pass
+            elif self.mv_pattern == engine.mv_pattern_look:
                 n = random.randrange(0,768)
                 if n <= 3:
                     self.dir = DIR_UP
-                    if (self.y - block_size) >= self.start_y - (self.radius * block_size):
-                        if get_tile_walkable(self.x, self.y - block_size):
-                            self.move(0, -1)
                 elif n <= 6:
                     self.dir = DIR_DOWN
-                    if (self.y + block_size) <= self.start_y + (self.radius * block_size):
-                        if get_tile_walkable(self.x, self.y + block_size):
-                            self.move(0, 1)
                 elif n <= 9:
                     self.dir = DIR_LEFT
-                    if (self.x - block_size) >= self.start_x - (self.radius * block_size):
-                        if get_tile_walkable(self.x - block_size, self.y):
-                            self.move(-1,0)
                 elif n <= 12:
                     self.dir = DIR_RIGHT
-                    if (self.x + block_size) <= self.start_x + (self.radius * block_size):
-                        if get_tile_walkable(self.x + block_size, self.y):
-                            self.move(1,0)
-                elif KEY_NO_DIR:
+                else:
                     pass
         if self.dest_x > self.x:
             self.x += self.move_speed
@@ -364,6 +399,40 @@ class NPC:
         #pygame.draw.rect(gameDisplay, green, [self.x - cam.x, self.y - cam.y, block_size, block_size])
 
 
+class Door:
+    def __init__(self, x, y, dest_map, dest_x, dest_y, warp_type, width = block_size, height = block_size):
+        self.x = x
+        self.y = y
+        self.width = width
+        self.height = height
+        self.dest_map = dest_map
+        self.dest_x = dest_x
+        self.dest_y = dest_y
+        self.warp_type = warp_type
+
+    def interact(self):
+        pass
+
+    @asyncio.coroutine
+    def warp(self):
+        project.se_list[1].play()
+        asyncio.sleep(0.05)
+
+        asyncio.sleep(0.05)
+        asyncio.sleep(0.05)
+        engine.warp(self.dest_map, self.dest_x, self.dest_y)
+        asyncio.sleep(0.05)
+        asyncio.sleep(0.05)
+
+    def draw(self):
+        pass
+
+    def inside_box(self, x, y):
+        if ((x >= self.x) and (x < self.x + self.width)) and ((y >= self.y) and (y < self.y + self.height)):
+            return True
+        return False
+
+
 class Signpost:
     def __init__(self, x, y, text):
         self.x = x
@@ -409,7 +478,10 @@ class BerryTree:
 
 
 def on_enter_tile(x, y):
-    pass
+    for obj in obj_list:
+        if obj.type == "door":
+            if obj.inside_box(x*block_size,y*block_size):
+                loop.run_until_complete(obj.warp())
 
 
 def get_tile_walkable(x,y,layer=1):
@@ -516,6 +588,60 @@ def load_map(name):
         pygame.mixer.music.play(-1,0.0)
 
 
+def unload_map():
+    del animated_tiles_0
+    del tileimages_sub
+    del tileimages_0
+    del events
+    del obj_list
+    del connection_left
+    del c_left_offset
+    del c_left_tileimages_0
+    del c_left_surface
+    del connection_right
+    del c_right_offset
+    del c_right_tileimages_0
+    del connection_up
+    del c_up_offset
+    del c_up_tileimages_0
+    del connection_down
+    del c_down_offset
+    del c_down_tileimages_0
+    del map
+
+
+def load_map_from_connection(dir):
+    if dir == DIR_LEFT:
+        global map
+        name = map.properties['connection_left']
+        del map
+        map = load_pygame(map_dir + name + '.tmx')
+        player.x += connection_left.width; player.y -= c_left_offset
+        del connection_left
+        del c_left_offset
+    elif dir == DIR_RIGHT:
+        global map
+        name = map.properties['connection_right']
+        del map
+        map = load_pygame(map_dir + name + '.tmx')
+        player.x -= connection_right.width; player.y -= c_right_offset
+    elif dir == DIR_UP:
+        global map
+        name = map.properties['connection_up']
+        del map
+        map = load_pygame(map_dir + name + '.tmx')
+        player.y += connection_up.height; player.x -= c_up_offset
+    elif dir == DIR_DOWN:
+        global map
+        name = map.properties['connection_down']
+        del map
+        map = load_pygame(map_dir + name + '.tmx')
+        player.y -= connection_down.height; player.x -= c_down_offset
+    load_tile_data()
+    load_obj_data()
+    load_map_connections()
+
+
 def load_tile_data():
     global animated_tiles_0
     animated_tiles_0 = []
@@ -549,13 +675,24 @@ def load_obj_data():
     for obj in events:
         if obj.type == "NPC":
             if 'char_image' in obj.properties:
-                npc = NPC(obj.x, obj.y, obj.properties['char_image'])
+                mv_pat = engine.mv_pattern_stationary
+                if 'move_type' in obj.properties:
+                    if obj.properties['move_type'] == 'stationary':
+                        mv_pat = engine.mv_pattern_stationary
+                    elif obj.properties['move_type'] == 'walk':
+                        mv_pat = engine.mv_pattern_walk
+                    elif obj.properties['move_type'] == 'look':
+                        mv_pat = engine.mv_pattern_look
+                npc = NPC(obj.x, obj.y, obj.properties['char_image'], mv_pat)
             else:
                 npc = NPC(obj.x, obj.y)
             obj_list.append(npc)
-        elif obj.type == "Signpost":
+        elif obj.type == "signpost":
             sign = Signpost(obj.x, obj.y, obj.properties['text'])
             obj_list.append(sign)
+        elif obj.type == "door":
+            door = Door()
+            obj_list.append(door)
 
 
 def load_map_connections():
@@ -661,11 +798,6 @@ gameDisplay = pygame.Surface((display_width, display_height))
 winDisplay = pygame.display.set_mode((display_width * resolution_factor, display_height * resolution_factor))
 pygame.display.update()
 pygame.display.set_caption(game_title)
-pygame.mixer.init(frequency=22050, size=-16, channels=2, buffer=4096)
-music = pygame.mixer.music
-pygame.font.init()
-Time = pygame.time
-clock = pygame.time.Clock()
 loop = asyncio.get_event_loop()
 inEvent = False
 cam = Camera()
