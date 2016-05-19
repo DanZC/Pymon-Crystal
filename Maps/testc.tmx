@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <map version="1.0" orientation="orthogonal" renderorder="right-down" width="32" height="40" tilewidth="32" tileheight="32" nextobjectid="1">
  <tileset firstgid="1" name="GSCoverworldjohtoday" tilewidth="32" tileheight="32" tilecount="1432" columns="8">
-  <image source="../GSCoverworldjohtoday.png" trans="ea00ff" width="256" height="5734"/>
+  <image source="../Tilesets/GSCoverworldjohtoday.png" trans="ea00ff" width="256" height="5734"/>
  </tileset>
  <layer name="SubTileLayer" width="32" height="40">
   <data encoding="csv">

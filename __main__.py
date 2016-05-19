@@ -4,6 +4,7 @@ sound_dir = 'Sounds/'
 map_dir = 'Maps/'
 spr_dir = 'Sprites/'
 ui_dir = 'UI/'
+script_dir = 'EventScripts/'
 
 import random
 
@@ -23,9 +24,11 @@ from time import time
 import engine
 import project
 from pytmx.util_pygame import load_pygame
-import sys
+import datetime
+import os
 import types
 import asyncio
+from import_file import import_file
 
 game_title = ''
 # game_icon = pygame.image.load('icon.png')
@@ -60,7 +63,158 @@ DIR_RIGHT = 1
 DIR_UP = 2
 DIR_DOWN = 3
 
+map = None
+
+song = None
+
 print('Setting up...')
+
+
+class SystemTime:
+
+    def get_hour(self):
+        return datetime.time().hour
+
+    def get_minute(self):
+        return datetime.time().minute
+
+    def getTimeOfDay(self):
+        if self.get_hour() >= 6 and self.get_hour() < 10:
+            return "Morning"
+        elif self.get_hour() >= 10 and self.get_hour() < 18:
+            return "Day"
+        else:
+            return "Night"
+
+systime = SystemTime()
+
+class Map:
+    def __init__(self, map_):
+        self.map = map_
+        self.width = map_.width
+        self.height = map_.height
+        self.properties = map_.properties
+        self.connections = {}
+        self.obj_list = []
+        self.animated_tiles_0 = []
+        self.tileimages_sub = []
+        self.tileimages_0 = []
+        self.load_tile_data()
+        self.events = self.map.get_layer_by_name("Events")
+        self.load_obj_data()
+        self.load_map_connections()
+        self.load_map_border()
+        global song
+        if 'music' in map_.properties:
+            if song is None:
+                music.load(music_dir + map_.properties['music'])
+                music.play(-1,0)
+                song = map_.properties['music']
+            if map_.properties['music'] != song:
+                pygame.mixer.music.fadeout(1)
+                pygame.mixer.music.queue(music_dir + map_.properties['music'])
+                song = map_.properties['music']
+
+    def load_tile_data(self):
+        for y in range(self.map.height):
+            for x in range(self.map.width):
+                image_list = []
+                props = self.map.get_tile_properties(x,y,0)
+                if 'frames' in props:
+                    if len(props['frames']) > 1:
+                        for animation_frame in props['frames']:
+                            d = animation_frame.duration
+                            i = animation_frame.gid
+                            image_list.append(i)
+                        animtile = AnimatedTile((x*block_size,y*block_size), image_list)
+                        self.animated_tiles_0.append(animtile)
+        for y in range(self.map.height):
+            for x in range(self.map.width):
+                image = self.map.get_tile_image(x, y, 1)
+                self.tileimages_0.append((x, y, image.convert_alpha()))
+
+    def load_obj_data(self):
+        for obj in self.events:
+            if obj.type == "NPC":
+                if 'char_image' in obj.properties:
+                    mv_pat = engine.mv_pattern_stationary
+                    if 'move_type' in obj.properties:
+                        if obj.properties['move_type'] == 'stationary':
+                            mv_pat = engine.mv_pattern_stationary
+                        elif obj.properties['move_type'] == 'walk':
+                            mv_pat = engine.mv_pattern_walk
+                        elif obj.properties['move_type'] == 'look':
+                            mv_pat = engine.mv_pattern_look
+                    npc = NPC(obj.x, obj.y, obj.properties, obj.properties['char_image'], mv_pat)
+                else:
+                    npc = NPC(obj.x, obj.y, obj.properties)
+                self.obj_list.append(npc)
+            elif obj.type == "signpost":
+                sign = Signpost(obj.x, obj.y, obj.properties['text'])
+                self.obj_list.append(sign)
+            elif obj.type == "door":
+                door = Door(obj.x, obj.y, obj.properties['dest_map'], float(obj.properties['dest_x']), float(obj.properties['dest_y']), obj.properties['warp_type'])
+                self.obj_list.append(door)
+
+    def load_map_border(self):
+        if 'tile_border' in self.map.properties:
+            self.tile_border_img = pygame.image.load(self.map.properties['tile_border'])
+            self.map_base = pygame.Surface((64 * (self.map.width + 8),64 * (self.map.height + 8)))
+            x = -64 * 6
+            y = -64 * 6
+            while x < 64 * (self.map.width + 6):
+                y = -64 * 6
+                while y < 64 * (self.map.height + 6):
+                    self.map_base.blit(self.tile_border_img, (x - cam.x, y - cam.y))
+                    y += 64
+                x += 64
+
+        else:
+            tile_border_img = pygame.image.load('blackborder.png')
+
+    def load_map_connections(self):
+        c_left_offset = 0
+        c_right_offset = 0
+        c_up_offset = 0
+        c_down_offset = 0
+        if 'connection_left' in self.map.properties:
+            c_left_map = load_pygame(map_dir + self.map.properties['connection_left'])
+            if 'c_left_offset' in self.map.properties:
+                c_left_offset = int(self.map.properties['c_left_offset'])
+            connection_left = MapConnection(c_left_map, DIR_LEFT, c_left_offset)
+            self.connections['left'] = connection_left
+        if 'connection_right' in self.map.properties:
+            c_right_map = load_pygame(map_dir + self.map.properties['connection_left'])
+            if 'c_right_offset' in self.map.properties:
+                c_right_offset = int(self.map.properties['c_left_offset'])
+            connection_right = MapConnection(c_right_map, DIR_RIGHT, c_right_offset)
+            self.connections['right'] = connection_right
+
+
+class MapConnection():
+    def __init__(self, map, direction, offset):
+        self.map = map
+        self.width = map.width
+        self.height = map.height
+        self.offset = offset
+        self.direction = direction
+        self.images = []
+        self.surface = None
+        self.load_tiles()
+
+    def load_tiles(self):
+        for y in range(self.height):
+            for x in range(self.width):
+                image = self.map.get_tile_image(x, y, 1)
+                self.images.append((x, y, image))
+        self.surface = pygame.Surface((self.width * block_size,self.height * block_size))
+        for x,y,image in self.images:
+            self.surface.blit(image, (x * block_size, y * block_size))
+
+    def draw(self):
+        if self.direction == DIR_LEFT:
+            if 'left' in map.connections:
+                gameDisplay.blit(self.surface, ((-self.width * block_size)-cam.x,(self.offset * block_size)-cam.y))
 
 
 class GameData:
@@ -77,9 +231,11 @@ class SaveData:
     def __init__(self):
         self.player = player.data
         self.game = gameData
+
     def sync(self):
         self.player = player.data
         self.game = gameData
+
     def export(self,file_path):
         pass
 
@@ -92,7 +248,7 @@ class AnimatedTile:
         self.gidlist = images
         self.images = []
         for gid in self.gidlist:
-            self.images.append(map.get_tile_image_by_gid(gid))
+            self.images.append(dmap.get_tile_image_by_gid(gid))
         self.frame = 0
         self.pause = 2
         self.max_frame = len(images) - 1
@@ -117,8 +273,8 @@ class Camera:
         self.height = display_height
 
     def realign(self):
-        self.x = ((player.x - (display_width / 2)) / 32.0) * 32.0
-        self.y = ((player.y - (display_height / 2)) / 32.0) * 32.0
+        self.x = (((player.x - (display_width / 2)) / 32.0) * 32.0) + 32
+        self.y = (((player.y - (display_height / 2)) / 32.0) * 32.0) + 16
 
     def set_pos(self, x=0, y=0):
         self.x = x
@@ -126,7 +282,7 @@ class Camera:
 
     def draw(self):
         if 'tile_border' in map.properties:
-            gameDisplay.blit(map_base, ((-64*6)-cam.x, (-64*6)-cam.y))
+            gameDisplay.blit(map.map_base, ((-64*6)-cam.x, (-64*6)-cam.y))
         else:
             gameDisplay.fill(black)
 
@@ -134,13 +290,15 @@ class Camera:
 class ScreenCover:
     def __init__(self):
         self.color = white
-        self.alpha = 255
-        obj_list.append(self)
+        self.visible = False
+
+    def update(self):
+        pass
 
     def draw(self):
-        color_alpha = (self.color[0],self.color[1],self.color[2],self.alpha)
-        pygame.draw.rect(gameDisplay, color_alpha,[0,0, display_width, display_height])
-
+        if self.visible:
+            color_alpha = (self.color[0],self.color[1],self.color[2], 128)
+            pygame.draw.rect(gameDisplay, color_alpha,(0,0,display_width,display_height))
 
 
 class Player:
@@ -200,22 +358,22 @@ class Player:
                         self.move(1, 0)
                 if KEY_A_DOWN:
                     if self.dir == DIR_UP and not self.isBusy:
-                        for obj in obj_list:
+                        for obj in map.obj_list:
                             if obj.y == self.y - block_size and obj.x == self.x:
                                 self.isBusy = True
                                 obj.interact()
                     elif self.dir == DIR_DOWN and not self.isBusy:
-                        for obj in obj_list:
+                        for obj in map.obj_list:
                             if obj.y == self.y + block_size and obj.x == self.x:
                                 self.isBusy = True
                                 obj.interact()
                     elif self.dir == DIR_LEFT and not self.isBusy:
-                        for obj in obj_list:
+                        for obj in map.obj_list:
                             if obj.x == self.x - block_size and obj.y == self.y:
                                 self.isBusy = True
                                 obj.interact()
                     elif self.dir == DIR_RIGHT and not self.isBusy:
-                        for obj in obj_list:
+                        for obj in map.obj_list:
                             if obj.x == self.x + block_size and obj.y == self.y:
                                 self.isBusy = True
                                 obj.interact()
@@ -228,7 +386,7 @@ class Player:
         elif self.dest_y < self.y:
             self.y -= self.move_speed
         if (self.x == self.dest_x and self.y == self.dest_y) and self.isMoving:
-            on_enter_tile(self.x / 32, self.y / 32)
+            on_enter_tile(self.x, self.y)
             self.isMoving = False
 
     def draw(self):
@@ -269,13 +427,15 @@ class Player:
 
 
 class NPC:
-    def __init__(self, x, y, img='char_ 44_D.png', direction = DIR_DOWN, mv_pattern = engine.mv_pattern_stationary):
+    def __init__(self, x, y, properties, img='char_ 44_D.png', direction = DIR_DOWN, mv_pattern = engine.mv_pattern_stationary, behavior = 'npcbehavior.py'):
         self.x = x
         self.y = y
         self.start_x = x
         self.start_y = y
         self.move_speed = 2
         self.mv_pattern = mv_pattern
+        self.behavior = import_file(script_dir + behavior)
+        self.properties = properties
         self.dir = direction
         self.radius = 3
         self.isMoving = False
@@ -359,7 +519,19 @@ class NPC:
         if self.step > 1:
             self.step = 0
 
+    def turn_toward_player(self):
+        if self.x > player.x and self.y == player.y:
+            self.dir = DIR_LEFT
+        elif self.x < player.x and self.y == player.y:
+            self.dir = DIR_RIGHT
+        elif self.y > player.y and self.x == player.x:
+            self.dir = DIR_UP
+        elif self.y < player.y and self.x == player.x:
+            self.dir = DIR_DOWN
+
     def interact(self):
+        self.behavior.__init__(self)
+        self.behavior.run()
         player.isBusy = False
 
     def draw(self):
@@ -409,20 +581,36 @@ class Door:
         self.dest_x = dest_x
         self.dest_y = dest_y
         self.warp_type = warp_type
+        self.type = 'door'
 
     def interact(self):
         pass
 
     @asyncio.coroutine
     def warp(self):
+        print('start')
         project.se_list[1].play()
-        asyncio.sleep(0.05)
-
-        asyncio.sleep(0.05)
-        asyncio.sleep(0.05)
+        cover.visible = True
+        m = 0
+        while m < 8:
+            asyncio.sleep(2)
+            draw_all()
+            clock.tick(fps)
+            m += 1
         engine.warp(self.dest_map, self.dest_x, self.dest_y)
-        asyncio.sleep(0.05)
-        asyncio.sleep(0.05)
+        asyncio.sleep(2)
+        cover.visible = False
+        m = 0
+        while m < 8:
+            asyncio.sleep(2)
+            draw_all()
+            clock.tick(fps)
+            m += 1
+        print('end')
+        print(player.x % block_size,player.y % block_size)
+
+    def update(self):
+        pass
 
     def draw(self):
         pass
@@ -430,7 +618,8 @@ class Door:
     def inside_box(self, x, y):
         if ((x >= self.x) and (x < self.x + self.width)) and ((y >= self.y) and (y < self.y + self.height)):
             return True
-        return False
+        else:
+            return False
 
 
 class Signpost:
@@ -451,6 +640,32 @@ class Signpost:
 
     def update(self):
         pass
+
+    def draw(self):
+        pass
+
+
+class StepTrigger:
+    def __init__(self, x, y, width, height, behavior):
+        self.x = x
+        self.y = y
+        self.width = width
+        self.height = height
+        self.behavior = behavior
+        self.type = 'trigger'
+
+    def interact(self):
+        self.behavior.__init__(self)
+        self.behavior.run()
+
+    def update(self):
+        pass
+
+    def inside_box(self, x, y):
+        if ((x >= self.x) and (x < self.x + self.width)) and ((y >= self.y) and (y < self.y + self.height)):
+            return True
+        else:
+            return False
 
     def draw(self):
         pass
@@ -478,24 +693,35 @@ class BerryTree:
 
 
 def on_enter_tile(x, y):
-    for obj in obj_list:
+    for obj in map.obj_list:
         if obj.type == "door":
-            if obj.inside_box(x*block_size,y*block_size):
+            if obj.inside_box(x,y):
+                print('warp')
                 loop.run_until_complete(obj.warp())
+        elif obj.type == "trigger":
+            if obj.inside_box(x,y):
+                print('trigger_activated')
+                obj.interact()
 
 
 def get_tile_walkable(x,y,layer=1):
+    for obj in map.obj_list:
+        if obj.type == "door":
+            if obj.warp_type == "exit":
+                loop.run_until_complete(obj.warp())
+                player.dir = DIR_DOWN
+                player.dest_y = player.y + 32
     if (x / block_size < 0 or x / block_size >= map.width) or (y / block_size < 0 or y / block_size >= map.height):
         return False
     if (player.x == x and player.y == y) or (player.dest_x == x and player.dest_y == y):
         return False
-    for obj in obj_list:
+    for obj in map.obj_list:
         if obj.type == "npc":
             if (obj.x == x and obj.y == y) or (obj.dest_x == x and obj.dest_y == y):
                 return False
-    props = map.get_tile_properties(x / block_size, y / block_size, 1)
+    props = map.map.get_tile_properties(x / block_size, y / block_size, 1)
     if 'isWalkable' in props:
-        if (props['isWalkable'] == "True"):
+        if props['isWalkable'] == "True":
             return True
         else:
             return False
@@ -504,10 +730,12 @@ def get_tile_walkable(x,y,layer=1):
 def init_all():
     global ui_elements
     ui_elements = []
+    ui_elements.append(cover)
 
 
 def main():
     global exit_game
+    global inMenu
     global KEY_LEFT
     global KEY_RIGHT
     global KEY_UP
@@ -515,7 +743,6 @@ def main():
     global KEY_A_DOWN
     global KEY_A
     global KEY_NO_DIR
-    load_tile_data()
     while not exit_game:
         KEY_A_DOWN = False
         for event in pygame.event.get():
@@ -549,6 +776,11 @@ def main():
             elif event.type == pygame.KEYUP:
                 if event.key == pygame.K_c:
                     KEY_A = False
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_LSHIFT:
+                    inMenu = True
+                    engine.open_menu()
+                    inMenu = False
         if not KEY_LEFT and not KEY_RIGHT and not KEY_UP and not KEY_DOWN:
             KEY_NO_DIR = True
         else:
@@ -560,231 +792,66 @@ def main():
 
 
 def update_all():
-    for obj in obj_list:
+    for obj in map.obj_list:
         obj.update()
     player.update()
 
 
-def get_tile_location_from_gid(gid):
-    pgid = gid
-    for layer in range(2):
-        for y in range(map.height):
-            for x in range(map.width):
-                tgid = map.get_tile_gid(x,y,layer)
-                if tgid == pgid:
-                    return x,y,layer
-    return 900,900,0
-
-
 def load_map(name):
     global map
-    map = load_pygame(map_dir + name + '.tmx')
-    load_tile_data()
-    load_obj_data()
-    load_map_connections()
-    load_map_border()
-    if 'music' in map.properties:
-        pygame.mixer.music.load(music_dir + map.properties['music'])
-        pygame.mixer.music.play(-1,0.0)
+    global dmap
+    dmap = load_pygame(map_dir + name + '.tmx')
+    map = Map(dmap)
+    del dmap
 
 
 def unload_map():
-    del animated_tiles_0
-    del tileimages_sub
-    del tileimages_0
-    del events
-    del obj_list
-    del connection_left
-    del c_left_offset
-    del c_left_tileimages_0
-    del c_left_surface
-    del connection_right
-    del c_right_offset
-    del c_right_tileimages_0
-    del connection_up
-    del c_up_offset
-    del c_up_tileimages_0
-    del connection_down
-    del c_down_offset
-    del c_down_tileimages_0
+    global map
     del map
 
 
-def load_map_from_connection(dir):
-    if dir == DIR_LEFT:
-        global map
-        name = map.properties['connection_left']
-        del map
-        map = load_pygame(map_dir + name + '.tmx')
-        player.x += connection_left.width; player.y -= c_left_offset
-        del connection_left
-        del c_left_offset
-    elif dir == DIR_RIGHT:
-        global map
-        name = map.properties['connection_right']
-        del map
-        map = load_pygame(map_dir + name + '.tmx')
-        player.x -= connection_right.width; player.y -= c_right_offset
-    elif dir == DIR_UP:
-        global map
-        name = map.properties['connection_up']
-        del map
-        map = load_pygame(map_dir + name + '.tmx')
-        player.y += connection_up.height; player.x -= c_up_offset
-    elif dir == DIR_DOWN:
-        global map
-        name = map.properties['connection_down']
-        del map
-        map = load_pygame(map_dir + name + '.tmx')
-        player.y -= connection_down.height; player.x -= c_down_offset
-    load_tile_data()
-    load_obj_data()
-    load_map_connections()
-
-
-def load_tile_data():
-    global animated_tiles_0
-    animated_tiles_0 = []
-    global tileimages_sub
-    tileimages_sub = []
-    for y in range(map.height):
-        for x in range(map.width):
-            image_list = []
-            props = map.get_tile_properties(x,y,0)
-            if 'frames' in props:
-                if len(props['frames']) > 1:
-                    for animation_frame in props['frames']:
-                        d = animation_frame.duration
-                        i = animation_frame.gid
-                        image_list.append(i)
-                    animtile = AnimatedTile((x*block_size,y*block_size), image_list)
-                    animated_tiles_0.append(animtile)
-    global tileimages_0
-    tileimages_0 = []
-    for y in range(map.height):
-        for x in range(map.width):
-            image = map.get_tile_image(x, y, 1)
-            tileimages_0.append((x, y, image.convert_alpha()))
-
-
-def load_obj_data():
-    global obj_list
-    obj_list = []
-    global events
-    events = map.get_layer_by_name("Events")
-    for obj in events:
-        if obj.type == "NPC":
-            if 'char_image' in obj.properties:
-                mv_pat = engine.mv_pattern_stationary
-                if 'move_type' in obj.properties:
-                    if obj.properties['move_type'] == 'stationary':
-                        mv_pat = engine.mv_pattern_stationary
-                    elif obj.properties['move_type'] == 'walk':
-                        mv_pat = engine.mv_pattern_walk
-                    elif obj.properties['move_type'] == 'look':
-                        mv_pat = engine.mv_pattern_look
-                npc = NPC(obj.x, obj.y, obj.properties['char_image'], mv_pat)
-            else:
-                npc = NPC(obj.x, obj.y)
-            obj_list.append(npc)
-        elif obj.type == "signpost":
-            sign = Signpost(obj.x, obj.y, obj.properties['text'])
-            obj_list.append(sign)
-        elif obj.type == "door":
-            door = Door()
-            obj_list.append(door)
-
-
-def load_map_connections():
-    global connection_left
-    global c_left_offset
-    global c_left_tileimages_0
-    global c_left_surface
-    global connection_right
-    global c_right_offset
-    global c_right_tileimages_0
-    global connection_up
-    global c_up_offset
-    global c_up_tileimages_0
-    global connection_down
-    global c_down_offset
-    global c_down_tileimages_0
-    if 'connection_left' in map.properties:
-        connection_left = load_pygame(map_dir + map.properties['connection_left'])
-        global c_left_tileimages_0
-        c_left_tileimages_0 = []
-        c_left_offset = 0
-        if 'c_left_offset' in map.properties:
-            c_left_offset = int(map.properties['c_left_offset'])
-        for y in range(connection_left.height):
-            for x in range(connection_left.width):
-                image = connection_left.get_tile_image(x, y, 1)
-                c_left_tileimages_0.append((x, y, image))
-                #c_left_tileimages_0.append((x - connection_left.width, y - (c_left_offset), image))
-        c_left_surface = pygame.Surface((connection_left.width * block_size,connection_left.height * block_size))
-        for x,y,image in c_left_tileimages_0:
-            c_left_surface.blit(image, (x * block_size, y * block_size))
-    if 'connection_right' in map.properties:
-        connection_right = load_pygame(map_dir + map.properties['connection_right'])
-        global c_right_tileimages_0
-        c_right_tileimages_0 = []
-        c_right_offset = 0
-        if 'c_right_offset' in map.properties:
-            c_right_offset = map.properties['c_right_offset']
-        for y in range(connection_right.height):
-            for x in range(connection_right.width):
-                image = map.get_tile_image(x, y, 1)
-                c_right_tileimages_0.append((x - connection_right.width, y - (c_right_offset*block_size), image))
-
-
-def draw_connection(dir):
-    if dir == DIR_LEFT:
-        if 'connection_left' in map.properties:
-            gameDisplay.blit(c_left_surface, ((-connection_left.width * block_size)-cam.x,(c_left_offset * block_size)-cam.y))
-
-    elif dir == DIR_RIGHT:
-        if 'connection_right' in map.properties:
-            for x, y, image in c_right_tileimages_0:
-                if (x * block_size) - cam.x >= -block_size and (x * block_size) - cam.x < cam.width and (
-                            y * block_size) - cam.y >= -block_size and (y * block_size) - cam.y < cam.height:
-                    gameDisplay.blit(image.convert_alpha(), ((x * block_size) - cam.x, (y * block_size) - cam.y))
-
-
-def load_map_border():
-    global tile_border_img
-    global map_base
-    if 'tile_border' in map.properties:
-        tile_border_img = pygame.image.load(map.properties['tile_border'])
-        map_base = pygame.Surface((64 * (map.width + 8),64 * (map.height + 8)))
-        x = -64 * 6
-        y = -64 * 6
-        while x < 64 * (map.width + 6):
-            y = -64 * 6
-            while y < 64 * (map.height + 6):
-                map_base.blit(tile_border_img, (x - cam.x, y - cam.y))
-                y += 64
-            x += 64
-
-    else:
-        tile_border_img = pygame.load('blackborder.png')
+# def load_map_from_connection(dir):
+#     if dir == DIR_LEFT:
+#         global map
+#         name = map.properties['connection_left']
+#         del map
+#         map = load_pygame(map_dir + name + '.tmx')
+#         player.x += connection_left.width; player.y -= c_left_offset
+#         del connection_left
+#         del c_left_offset
+#     elif dir == DIR_RIGHT:
+#         global map
+#         name = map.properties['connection_right']
+#         del map
+#         map = load_pygame(map_dir + name + '.tmx')
+#         player.x -= connection_right.width; player.y -= c_right_offset
+#     elif dir == DIR_UP:
+#         global map
+#         name = map.properties['connection_up']
+#         del map
+#         map = load_pygame(map_dir + name + '.tmx')
+#         player.y += connection_up.height; player.x -= c_up_offset
+#     elif dir == DIR_DOWN:
+#         global map
+#         name = map.properties['connection_down']
+#         del map
+#         map = load_pygame(map_dir + name + '.tmx')
+#         player.y -= connection_down.height; player.x -= c_down_offset
 
 
 def draw_all():
     if cam.center_on_player:
         cam.realign()
     cam.draw()
-    global tileimages_0
-    for x, y, image in tileimages_0:
+    for x, y, image in map.tileimages_0:
         if (x * block_size) - cam.x >= -block_size and (x * block_size) - cam.x < cam.width and (
                 y * block_size) - cam.y >= -block_size and (y * block_size) - cam.y < cam.height:
             gameDisplay.blit(image.convert_alpha(), ((x * block_size) - cam.x, (y * block_size) - cam.y))
-    for tile in animated_tiles_0:
+    for tile in map.animated_tiles_0:
         tile.draw()
-    draw_connection(DIR_LEFT)
-    draw_connection(DIR_RIGHT)
-    draw_connection(DIR_UP)
-    draw_connection(DIR_DOWN)
-    for obj in obj_list:
+    for connection in map.connections:
+        map.connections[connection].draw()
+    for obj in map.obj_list:
         obj.draw()
     player.draw()
     for element in ui_elements:
@@ -803,6 +870,8 @@ inEvent = False
 cam = Camera()
 obj_list = []
 ui_elements = []
+inMenu = False
+cover = ScreenCover()
 load_map('test')
 player = Player()
 gameData = GameData()

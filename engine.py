@@ -50,6 +50,64 @@ class TextBox:
             __main__.gameDisplay.blit(self.text_surface_ln_3, (18, __main__.display_height - 32))
 
 
+class MenuBox:
+    def __init__(self):
+        self.options = []
+        plyr = __main__.player
+        if plyr.data.hasDex:
+            self.options.append("POKeDEX")
+        if len(plyr.data.party) > 0:
+            self.options.append("POKeMON")
+        self.options.append("BAG")
+        if plyr.data.hasGear:
+            self.options.append("POKeGEAR")
+        self.options.append(plyr.data.name)
+        self.options.append("SAVE")
+        self.options.append("EXIT")
+        self.topimg = pygame.image.load(__main__.ui_dir + 'menu_top.png')
+        self.midimg = pygame.image.load(__main__.ui_dir + 'menu_mid.png')
+        self.bottomimg = pygame.image.load(__main__.ui_dir + 'menu_bottom.png')
+        self.select = 0
+        self.selector = pygame.image.load(__main__.ui_dir + 'selector.png')
+
+    def move_select(self,amount):
+        if amount > 0:
+            if self.select + amount >= len(self.options):
+                self.select = 0
+            else:
+                self.select += amount
+        elif amount < 0:
+            if self.select + amount < 0:
+                self.select = len(self.options) - 1
+            else:
+                self.select += amount
+
+    def select_option(self):
+        if self.options[self.select] == "SAVE":
+            print("save selected")
+        elif self.options[self.select] == "OPTION":
+            print("options selected")
+        elif self.options[self.select] == "POKeMON":
+            print("pokemon selected")
+
+
+
+    def draw(self):
+        gd = __main__.gameDisplay
+        gd.blit(self.topimg, (160,0))
+        y = 1
+        n = len(self.options)
+        for option in self.options:
+            if y == n:
+                gd.blit(self.bottomimg, (160,y*32))
+            else:
+                gd.blit(self.midimg, (160,y*32))
+            text = font.render(option,False,black)
+            gd.blit(text,(192,y*32))
+            y += 1
+        gd.blit(self.selector, (178,(self.select + 1)*32))
+
+
 class Item:
     def __init__(self, name, desc, type, price, scope, effect):
         self.name = name
@@ -158,11 +216,11 @@ class PlayerData:
         self.badges = [False,False,False,False,False,False,False,False]
         self.party = []
         self.party.append(Mon(project.species_list[3], 5))
+        self.hasDex = False
+        self.hasGear = False
+        self.gearMapCard = False
+        self.gearJukebox = False
         self.bag = self.Bag()
-
-
-
-
 
 import project
 
@@ -356,9 +414,41 @@ def receive_item(item):
     __main__.loop.run_until_complete(show_text(project.str_list['item_in_bag'].format(item.name,pocket)))
 
 
-@asyncio.coroutine
 def warp(map, x, y):
+    print('unload_map')
     __main__.unload_map()
-    __main__.load_map(map_dir + map + '.tmx')
-    player.x = math.floor(x / block_size)
-    player.y = math.floor(y / block_size)
+    print('load_map')
+    __main__.load_map(map)
+    __main__.player.x = math.floor((x * 32.0) / 32)
+    __main__.player.y = math.floor((y * 32.0) / 32)
+    __main__.player.dest_x = __main__.player.x
+    __main__.player.dest_y = __main__.player.y
+
+
+def open_menu():
+    menu = MenuBox()
+    __main__.ui_elements.append(menu)
+    while True:
+        getout = False
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                quit()
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_LSHIFT:
+                    getout = True
+                if event.key == pygame.K_DOWN:
+                    menu.move_select(1)
+                if event.key == pygame.K_UP:
+                    menu.move_select(-1)
+                if event.key == pygame.K_c:
+                    if menu.options[menu.select] == "EXIT":
+                        getout = True
+                    else:
+                        menu.select_option()
+        if getout == True:
+            break
+        __main__.draw_all()
+        __main__.clock.tick(__main__.fps)
+    __main__.ui_elements.remove(menu)
+    del menu

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.0" orientation="orthogonal" renderorder="right-down" width="9" height="8" tilewidth="32" tileheight="32" backgroundcolor="#000000" nextobjectid="10">
+<map version="1.0" orientation="orthogonal" renderorder="right-down" width="9" height="8" tilewidth="32" tileheight="32" backgroundcolor="#000000" nextobjectid="11">
  <properties>
   <property name="music" value="test.mid"/>
   <property name="outside" value="False"/>
@@ -261,14 +261,14 @@
  </layer>
  <layer name="TileMap" width="9" height="8">
   <data encoding="csv">
-1,1,5,3,5,5,6,5,5,
-9,9,12,11,12,12,12,12,12,
+1,1,5,3,5,5,6,5,7,
+9,9,12,11,12,12,12,12,15,
 12,12,12,12,12,12,12,12,12,
 12,12,13,17,18,19,13,12,12,
 12,12,13,25,26,27,13,12,12,
 8,12,12,12,12,12,12,12,8,
 16,12,12,14,14,12,12,12,16,
-47,47,47,47,47,47,47,47,47
+33,33,33,33,33,33,33,33,33
 </data>
  </layer>
  <objectgroup name="Events">
@@ -276,7 +276,7 @@
    <properties>
     <property name="char_img" value="char_44_D.png"/>
     <property name="move_type" value="stationary"/>
-    <property name="text0" value="HELLO!"/>
+    <property name="text" value="HELLO!"/>
    </properties>
   </object>
   <object id="8" type="door" x="96" y="224" width="64" height="32">
@@ -285,6 +285,11 @@
     <property name="dest_x" value="544"/>
     <property name="dest_y" value="224"/>
     <property name="warp_type" value="exit"/>
+   </properties>
+  </object>
+  <object id="10" type="signpost" x="96" y="32" width="32" height="32">
+   <properties>
+    <property name="text" value="It's a TV."/>
    </properties>
   </object>
  </objectgroup>
