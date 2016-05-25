@@ -1,0 +1,30 @@
+{"encounters":{
+  "grass":{
+    "prev":12.1,
+    "all":[
+      {"species":"RATTATA","weight":25,"min_lvl":2,"max_lvl":4},
+      {"species":"SENTRET","weight":25,"min_lvl":2,"max_lvl":4}
+    ],
+    "morning":[],
+    "day":[
+      {"species":"PIDGEY","weight":25,"min_lvl":2,"max_lvl":4}
+    ],
+    "night":[
+      {"species":"HOOTHOOT","weight":25,"min_lvl":2,"max_lvl":4}
+    ]
+  },
+  "water":{
+    "all":{},
+    "morning":{},
+    "day":{},
+    "night":{}
+  },
+  "fish":{
+    "prev":18.1,
+    "old":[
+      {"species":"MAGIKARP","weight":100,"min_lvl":3,"max_lvl":8}
+    ],
+    "good":{},
+    "super":{}
+  }
+}}

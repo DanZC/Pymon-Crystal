@@ -1,11 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.0" orientation="orthogonal" renderorder="right-down" width="9" height="8" tilewidth="32" tileheight="32" backgroundcolor="#383838" nextobjectid="11">
+<map version="1.0" orientation="orthogonal" renderorder="right-down" width="10" height="9" tilewidth="32" tileheight="32" backgroundcolor="#383838" nextobjectid="2">
  <properties>
-  <property name="music" value="test.mid"/>
-  <property name="outside" value="False"/>
+  <property name="music" value="PkmGS-Center.mid"/>
+  <property name="return_script" value="gameover_std.py"/>
+  <property name="return_x" type="float" value="96"/>
+  <property name="return_y" type="float" value="96"/>
  </properties>
- <tileset firstgid="1" name="tileset" tilewidth="32" tileheight="32" tilecount="48" columns="8">
-  <image source="../Tilesets/GSC house 2.png" trans="ea00ff" width="256" height="192"/>
+ <tileset firstgid="1" name="GSC pkmn center" tilewidth="32" tileheight="32" tilecount="56" columns="8">
+  <image source="../Tilesets/GSC pkmn center.png" trans="ea00ff" width="256" height="224"/>
   <tile id="0">
    <properties>
     <property name="isWalkable" type="bool" value="false"/>
@@ -63,17 +65,17 @@
   </tile>
   <tile id="11">
    <properties>
-    <property name="isWalkable" type="bool" value="true"/>
+    <property name="isWalkable" type="bool" value="false"/>
    </properties>
   </tile>
   <tile id="12">
    <properties>
-    <property name="isWalkable" type="bool" value="true"/>
+    <property name="isWalkable" type="bool" value="false"/>
    </properties>
   </tile>
   <tile id="13">
    <properties>
-    <property name="isWalkable" type="bool" value="true"/>
+    <property name="isWalkable" type="bool" value="false"/>
    </properties>
   </tile>
   <tile id="14">
@@ -93,7 +95,7 @@
   </tile>
   <tile id="17">
    <properties>
-    <property name="isWalkable" type="bool" value="false"/>
+    <property name="isWalkable" type="bool" value="true"/>
    </properties>
   </tile>
   <tile id="18">
@@ -128,27 +130,27 @@
   </tile>
   <tile id="24">
    <properties>
-    <property name="isWalkable" type="bool" value="false"/>
+    <property name="isWalkable" type="bool" value="true"/>
    </properties>
   </tile>
   <tile id="25">
    <properties>
-    <property name="isWalkable" type="bool" value="false"/>
+    <property name="isWalkable" type="bool" value="true"/>
    </properties>
   </tile>
   <tile id="26">
    <properties>
-    <property name="isWalkable" type="bool" value="false"/>
+    <property name="isWalkable" type="bool" value="true"/>
    </properties>
   </tile>
   <tile id="27">
    <properties>
-    <property name="isWalkable" type="bool" value="false"/>
+    <property name="isWalkable" type="bool" value="true"/>
    </properties>
   </tile>
   <tile id="28">
    <properties>
-    <property name="isWalkable" type="bool" value="false"/>
+    <property name="isWalkable" type="bool" value="true"/>
    </properties>
   </tile>
   <tile id="29">
@@ -198,17 +200,17 @@
   </tile>
   <tile id="38">
    <properties>
-    <property name="isWalkable" type="bool" value="true"/>
+    <property name="isWalkable" type="bool" value="false"/>
    </properties>
   </tile>
   <tile id="39">
    <properties>
-    <property name="isWalkable" type="bool" value="true"/>
+    <property name="isWalkable" type="bool" value="false"/>
    </properties>
   </tile>
   <tile id="40">
    <properties>
-    <property name="isWalkable" type="bool" value="true"/>
+    <property name="isWalkable" type="bool" value="false"/>
    </properties>
   </tile>
   <tile id="41">
@@ -218,7 +220,7 @@
   </tile>
   <tile id="42">
    <properties>
-    <property name="isWalkable" type="bool" value="true"/>
+    <property name="isWalkable" type="bool" value="false"/>
    </properties>
   </tile>
   <tile id="43">
@@ -246,50 +248,80 @@
     <property name="isWalkable" type="bool" value="false"/>
    </properties>
   </tile>
+  <tile id="48">
+   <properties>
+    <property name="isWalkable" type="bool" value="false"/>
+   </properties>
+  </tile>
+  <tile id="49">
+   <properties>
+    <property name="isWalkable" type="bool" value="false"/>
+   </properties>
+  </tile>
+  <tile id="50">
+   <properties>
+    <property name="isWalkable" type="bool" value="false"/>
+   </properties>
+  </tile>
+  <tile id="51">
+   <properties>
+    <property name="isWalkable" type="bool" value="false"/>
+   </properties>
+  </tile>
+  <tile id="52">
+   <properties>
+    <property name="isWalkable" type="bool" value="false"/>
+   </properties>
+  </tile>
+  <tile id="53">
+   <properties>
+    <property name="isWalkable" type="bool" value="false"/>
+   </properties>
+  </tile>
+  <tile id="54">
+   <properties>
+    <property name="isWalkable" type="bool" value="false"/>
+   </properties>
+  </tile>
+  <tile id="55">
+   <properties>
+    <property name="isWalkable" type="bool" value="false"/>
+   </properties>
+  </tile>
  </tileset>
- <layer name="SubTileLayer" width="9" height="8" visible="0">
+ <layer name="SubLayer" width="10" height="9">
   <data encoding="csv">
-47,47,47,47,47,47,47,47,47,
-47,47,47,47,47,47,47,47,47,
-47,47,47,47,47,47,47,47,47,
-47,47,47,47,47,47,47,47,47,
-47,47,47,47,47,47,47,47,47,
-47,47,47,47,47,47,47,47,47,
-47,47,47,47,47,47,47,47,47,
-47,47,47,47,47,47,47,47,47
+13,13,13,13,13,13,13,13,13,13,
+13,13,13,13,13,13,13,13,13,13,
+13,13,13,13,13,13,13,13,13,13,
+13,13,13,13,13,13,13,13,13,13,
+13,13,13,13,13,13,13,13,13,13,
+13,13,13,13,13,13,13,13,13,13,
+13,13,13,13,13,13,13,13,13,13,
+13,13,13,13,13,13,13,13,13,13,
+13,13,13,13,13,13,13,13,13,13
 </data>
  </layer>
- <layer name="TileMap" width="9" height="8">
+ <layer name="TileLayer" width="10" height="9">
   <data encoding="csv">
-1,1,5,3,5,5,6,5,7,
-9,9,12,11,12,12,12,12,15,
-12,12,12,12,12,12,12,12,12,
-12,12,13,17,18,19,13,12,12,
-12,12,13,25,26,27,13,12,12,
-8,12,12,12,12,12,12,12,8,
-16,12,12,14,14,12,12,12,16,
-33,33,33,33,33,33,33,33,33
+1,2,3,4,4,6,4,4,4,5,
+9,10,11,25,25,14,25,25,25,20,
+17,17,19,17,21,22,29,29,29,29,
+25,25,25,25,25,25,29,29,29,29,
+29,29,29,29,29,29,29,29,29,29,
+29,29,29,29,29,29,29,28,28,29,
+29,29,29,29,29,29,29,29,29,29,
+29,29,29,27,27,29,29,28,28,29,
+13,13,13,13,13,13,13,13,13,13
 </data>
  </layer>
  <objectgroup name="Events">
-  <object id="7" type="NPC" x="64" y="96" width="32" height="32">
-   <properties>
-    <property name="char_img" value="char_44_D.png"/>
-    <property name="move_type" value="stationary"/>
-    <property name="text" value="HELLO!"/>
-   </properties>
-  </object>
-  <object id="8" type="door" x="96" y="224" width="64" height="32">
+  <object id="1" type="door" x="96" y="256" width="64" height="32">
    <properties>
     <property name="dest_map" value="test"/>
-    <property name="dest_x" type="float" value="544"/>
+    <property name="dest_x" type="float" value="224"/>
     <property name="dest_y" type="float" value="224"/>
     <property name="warp_type" value="exit"/>
-   </properties>
-  </object>
-  <object id="10" type="signpost" x="96" y="32" width="32" height="32">
-   <properties>
-    <property name="text" value="It's a TV."/>
    </properties>
   </object>
  </objectgroup>

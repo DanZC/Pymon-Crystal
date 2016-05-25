@@ -3,6 +3,7 @@ from threading import Thread
 import time
 import __main__
 from __main__ import *
+import pickle
 import asyncio
 import csv
 from pytmx.util_pygame import load_pygame
@@ -16,7 +17,7 @@ black = (0, 0, 0)
 
 pygame.font.init()
 font_size = 16
-font = pygame.font.Font('font.ttf',font_size)
+font = pygame.font.Font('UI/font.ttf',font_size)
 
 mv_pattern_stationary = 0
 mv_pattern_look = 1
@@ -30,6 +31,7 @@ mv_pattern_player = 7
 
 class TextBox:
     def __init__(self):
+        self.type = 'text_box'
         self.ln_1 = ''
         self.ln_2 = ''
         self.ln_3 = ''
@@ -52,6 +54,7 @@ class TextBox:
 
 class MenuBox:
     def __init__(self):
+        self.type = 'menu_box'
         self.options = []
         plyr = __main__.player
         if plyr.data.hasDex:
@@ -85,12 +88,13 @@ class MenuBox:
     def select_option(self):
         if self.options[self.select] == "SAVE":
             print("save selected")
+            __main__.loop.run_until_complete(show_text(project.str_list['save_prompt_1'],True))
+            __main__.save.export("test.bin")
+            __main__.loop.run_until_complete(show_text(project.str_list['save_prompt_2']))
         elif self.options[self.select] == "OPTION":
             print("options selected")
         elif self.options[self.select] == "POKeMON":
             print("pokemon selected")
-
-
 
     def draw(self):
         gd = __main__.gameDisplay
@@ -105,7 +109,7 @@ class MenuBox:
             text = font.render(option,False,black)
             gd.blit(text,(192,y*32))
             y += 1
-        gd.blit(self.selector, (178,(self.select + 1)*32))
+        gd.blit(self.selector, (178,((self.select + 1)*32)+4))
 
 
 class Item:
@@ -156,11 +160,12 @@ class Mon:
             ss = s.replace("%","")
             p = int(ss)
             del s
+            del ss
             g = random.randrange(0,100)
             if g < p:
-                gender = "male"
+                gender = "m"
             elif g >= p:
-                gender = "female"
+                gender = "f"
         else:
             gender = "?"
         return gender
@@ -191,22 +196,6 @@ class Mon:
 
 
 class PlayerData:
-    class Bag:
-        def __init__(self):
-            self.contents = []
-        def add_item(self,item):
-            self.contents.append(item)
-        def remove_item(self,item):
-            for itm in self.contents:
-                if item == itm:
-                    self.contents.remove(itm)
-        def count_item(self,item):
-            n = 0
-            for itm in self.contents:
-                if item.name == itm.name:
-                    n += 1
-            return n
-
     def __init__(self):
         self.name = 'PLAYER'
         self.rival_name = 'RIVAL'
@@ -220,7 +209,27 @@ class PlayerData:
         self.hasGear = False
         self.gearMapCard = False
         self.gearJukebox = False
-        self.bag = self.Bag()
+        self.bag = Bag()
+
+
+class Bag:
+    def __init__(self):
+        self.contents = []
+
+    def add_item(self,item):
+        self.contents.append(item)
+
+    def remove_item(self,item):
+        for itm in self.contents:
+            if item == itm:
+                self.contents.remove(itm)
+
+    def count_item(self,item):
+        n = 0
+        for itm in self.contents:
+            if item.name == itm.name:
+                n += 1
+        return n
 
 import project
 
@@ -235,7 +244,7 @@ def play_sound(sound):
         yield from asyncio.sleep(0.1)
 
 @asyncio.coroutine
-def show_text(text):
+def show_text(text, keep_open = False):
     text_box = TextBox()
     __main__.ui_elements.append(text_box)
     global command
@@ -381,25 +390,27 @@ def show_text(text):
                 t_index += 1
                 continue
         pygame.event.clear()
-        while True:
-            getout = False
-            for event in pygame.event.get():
-                if event.type == pygame.QUIT:
-                    pygame.quit()
-                    quit()
-                if event.type == pygame.KEYDOWN:
-                    if event.key == pygame.K_c:
-                        getout = True
-            if getout == True:
-                break
-            yield from asyncio.sleep(0.1)
-        text_box.ln_3 = ''
-        text_box.ln_2 = ''
-        text_box.ln_1 = ''
-        text_box.lines = 1
-        __main__.draw_all()
-    __main__.ui_elements.remove(text_box)
-    del text_box
+        if not keep_open:
+            while True:
+                getout = False
+                for event in pygame.event.get():
+                    if event.type == pygame.QUIT:
+                        pygame.quit()
+                        quit()
+                    if event.type == pygame.KEYDOWN:
+                        if event.key == pygame.K_c:
+                            getout = True
+                if getout == True:
+                    break
+                yield from asyncio.sleep(0.1)
+            text_box.ln_3 = ''
+            text_box.ln_2 = ''
+            text_box.ln_1 = ''
+            text_box.lines = 1
+            __main__.draw_all()
+    if not keep_open:
+        __main__.ui_elements.remove(text_box)
+        del text_box
 
 
 def get_prompt(text,type):
@@ -446,9 +457,29 @@ def open_menu():
                         getout = True
                     else:
                         menu.select_option()
+                        getout = True
         if getout == True:
             break
         __main__.draw_all()
         __main__.clock.tick(__main__.fps)
     __main__.ui_elements.remove(menu)
     del menu
+
+
+def clear_ui(ui_type):
+    for element in __main__.ui_elements:
+        if element.type == ui_type:
+            __main__.ui_elements.remove(element)
+            del element
+
+
+@asyncio.coroutine
+def save_game_async(obj, file_path):
+    asyncio.wait(8)
+    with open(file_path, "wb") as f:
+        if f.writable():
+            s_obj = pickle.dumps(obj)
+            f.write(s_obj)
+        else:
+            print(project.str_list['save_error'])
+    clear_ui('text_box')

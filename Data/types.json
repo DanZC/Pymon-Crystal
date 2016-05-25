@@ -55,23 +55,113 @@
     "ROCK":0.5,
     "ELECTRIC":0
   },
+  "ROCK":{
+    "WATER":2,
+    "GRASS":2,
+    "FIGHTING":2,
+    "GROUND":2,
+    "STEEL":2,
+    "POISON":0.5,
+    "NORMAL":0.5,
+    "FLYING":0.5,
+    "FIRE":0.5
+  },
+  "BUG":{
+    "FIRE":2,
+    "FLYING":2,
+    "ROCK":2,
+    "GRASS":0.5,
+    "GROUND":0.5,
+    "FIGHTING":0.5
+  },
+  "GHOST":{
+    "GHOST":2,
+    "DARK":2,
+    "BUG":0.5,
+    "POISON":0.5,
+    "NORMAL":0,
+    "FIGHTING":0
+  },
+  "FIRE":{
+    "GROUND":2,
+    "WATER":2,
+    "ROCK":2,
+    "GRASS":0.5,
+    "FIRE":0.5,
+    "BUG":0.5,
+    "ICE":0.5,
+    "STEEL":0.5
+  },
+  "WATER":{
+    "ELECTRIC":2,
+    "GRASS":2,
+    "FIRE":0.5,
+    "WATER":0.5,
+    "STEEL":0.5,
+    "ICE":0.5
+  },
+  "GRASS":{
+    "FIRE":2,
+    "FLYING":2,
+    "POISON":2,
+    "BUG":2,
+    "ICE":2,
+    "GROUND":0.5,
+    "WATER":0.5,
+    "GRASS":0.5,
+    "ELECTRIC":0.5
+  },
+  "ELECTRIC":{
+    "GROUND":2,
+    "ELECTRIC":0.5,
+    "FLYING":0.5,
+    "STEEL":0.5
+  },
+  "PSYCHIC":{
+    "BUG":2,
+    "GHOST":2,
+    "DARK":2,
+    "PSYCHIC":0.5,
+    "FIGHTING":0.5
+  },
+  "ICE":{
+    "FIGHTING":2,
+    "FIRE":2,
+    "ROCK":2,
+    "STEEL":2,
+    "ICE":0.5
+  },
+  "DRAGON":{
+    "DRAGON":2,
+    "ICE":2,
+    "ELECTRIC":0.5,
+    "FIRE":0.5,
+    "GRASS":0.5,
+    "WATER":0.5
+  },
+  "STEEL":{
+    "FIRE":2,
+    "FIGHTING":2,
+    "GROUND":2,
+    "NORMAL":0.5,
+    "FLYING":0.5,
+    "ROCK":0.5,
+    "BUG":0.5,
+    "GHOST":0.5,
+    "STEEL":0.5,
+    "GRASS":0.5,
+    "PSYCHIC":0.5,
+    "ICE":0.5,
+    "DRAGON":0.5,
+    "DARK":0.5,
+    "POISON":0
+  },
   "DARK":{
     "BUG":2,
     "FIGHTING":2,
     "DARK":0.5,
     "GHOST":0.5,
     "PSYCHIC":0
-  },
-  //"FIGHTING_":{"weak":["PSYCHIC","FLYING"],"resist":["ROCK","BUG","DARK"],"immune":[]},
-  //"FLYING_":{"weak":["ELECTRIC","ICE","ROCK"],"resist":["BUG","GRASS","FIGHTING"],"immune":["GROUND"]},
-  //"POISON_":{"weak":["PSYCHIC","GROUND"],"resist":["FIGHTING","BUG","GRASS","POISON"],"immune":[]},
-  "GROUND_":{"weak":["WATER","GRASS","ICE"],"resist":["POISON","ROCK"],"immune":["ELECTRIC"]},
-  "ROCK_":{"weak":["GRASS","FIGHTING","WATER","GROUND","STEEL"],"resist":["NORMAL","FLYING","POISON","FIRE"],"immune":[]},
-  "BUG_":{"weak":["FLYING","ROCK","FIRE"],"resist":["GRASS","GROUND","FIGHTING"],"immune":[]},
-  "GHOST_":{"weak":["GHOST","DARK"],"resist":["BUG","POISON"],"immune":["NORMAL","FIGHTING"]},
-  "STEEL_":{"weak":["FIRE","FIGHTING","GROUND"],"resist":["NORMAL","FLYING","ROCK","BUG","GHOST","STEEL","GRASS","PSYCHIC","ICE","DRAGON","DARK"],"immune":["POISON"]},
-  "FIRE_":{"weak":["GROUND","ROCK","WATER"],"resist":["FIRE","BUG","STEEL","GRASS","ICE"],"immune":[]},
-  "WATER_":{"weak":["ELECTRIC","GRASS"],"resist":["FIRE","WATER","STEEL","ICE"],"immune":[]},
-  "GRASS_":{"weak":["BUG","POISON","FIRE","FLYING","ICE"],"resist":["GROUND","WATER","GRASS","ELECTRIC"],"immune":[]}
+  }
 }
 }

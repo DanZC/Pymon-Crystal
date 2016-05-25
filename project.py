@@ -28,6 +28,15 @@ for item in items['items']:
     item_list[new_item.name] = new_item
     print('New item, "' + new_item.name + '," with a type of ' + new_item.type + '.')
 
+type_list = {}
+with open(data_dir + 'types.json') as json_data:
+    types_list = json.load(json_data)
+for type in types_list['types']:
+    type_list[type] = type
+    print("New type,",type_list[type])
+
+move_list = {}
+
 with open(data_dir + 'species.json') as json_data:
     mon_list = json.load(json_data)
 x = 0

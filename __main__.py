@@ -7,7 +7,8 @@ ui_dir = 'UI/'
 script_dir = 'EventScripts/'
 
 import random
-
+import pickle
+import io
 import pygame
 pygame.init()
 pygame.mixer.init(frequency=22050, size=-16, channels=2, buffer=40960)
@@ -57,6 +58,7 @@ KEY_UP = False
 KEY_DOWN = False
 KEY_LEFT = False
 KEY_RIGHT = False
+KEY_CODE = False
 
 DIR_LEFT = 0
 DIR_RIGHT = 1
@@ -88,6 +90,7 @@ class SystemTime:
 
 systime = SystemTime()
 
+
 class Map:
     def __init__(self, map_):
         self.map = map_
@@ -111,8 +114,9 @@ class Map:
                 music.play(-1,0)
                 song = map_.properties['music']
             if map_.properties['music'] != song:
-                pygame.mixer.music.fadeout(1)
-                pygame.mixer.music.queue(music_dir + map_.properties['music'])
+                music.fadeout(1)
+                music.load(music_dir + map_.properties['music'])
+                music.play(-1,0)
                 song = map_.properties['music']
 
     def load_tile_data(self):
@@ -120,18 +124,19 @@ class Map:
             for x in range(self.map.width):
                 image_list = []
                 props = self.map.get_tile_properties(x,y,0)
-                if 'frames' in props:
-                    if len(props['frames']) > 1:
-                        for animation_frame in props['frames']:
-                            d = animation_frame.duration
-                            i = animation_frame.gid
-                            image_list.append(i)
-                        animtile = AnimatedTile((x*block_size,y*block_size), image_list)
-                        self.animated_tiles_0.append(animtile)
+                if props is not None:
+                    if 'frames' in props:
+                        if len(props['frames']) > 1:
+                            for animation_frame in props['frames']:
+                                d = animation_frame.duration
+                                i = animation_frame.gid
+                                image_list.append(i)
+                            animtile = AnimatedTile((x*block_size,y*block_size), image_list)
+                            self.animated_tiles_0.append(animtile)
         for y in range(self.map.height):
             for x in range(self.map.width):
                 image = self.map.get_tile_image(x, y, 1)
-                self.tileimages_0.append((x, y, image.convert_alpha()))
+                self.tileimages_0.append((x, y, image))
 
     def load_obj_data(self):
         for obj in self.events:
@@ -155,6 +160,12 @@ class Map:
             elif obj.type == "door":
                 door = Door(obj.x, obj.y, obj.properties['dest_map'], float(obj.properties['dest_x']), float(obj.properties['dest_y']), obj.properties['warp_type'])
                 self.obj_list.append(door)
+            elif obj.type == "trigger_step":
+                if 'behavior' in obj.properties:
+                    trigger = StepTrigger(obj.x, obj.y,obj.width,obj.height,obj.properties['behavior'])
+                else:
+                    trigger = None
+                self.obj_list.append(trigger)
 
     def load_map_border(self):
         if 'tile_border' in self.map.properties:
@@ -178,17 +189,29 @@ class Map:
         c_up_offset = 0
         c_down_offset = 0
         if 'connection_left' in self.map.properties:
-            c_left_map = load_pygame(map_dir + self.map.properties['connection_left'])
+            c_left_map = load_pygame(map_dir + self.map.properties['connection_left'] + ".tmx")
             if 'c_left_offset' in self.map.properties:
                 c_left_offset = int(self.map.properties['c_left_offset'])
             connection_left = MapConnection(c_left_map, DIR_LEFT, c_left_offset)
             self.connections['left'] = connection_left
         if 'connection_right' in self.map.properties:
-            c_right_map = load_pygame(map_dir + self.map.properties['connection_left'])
+            c_right_map = load_pygame(map_dir + self.map.properties['connection_right'] + ".tmx")
             if 'c_right_offset' in self.map.properties:
-                c_right_offset = int(self.map.properties['c_left_offset'])
+                c_right_offset = int(self.map.properties['c_right_offset'])
             connection_right = MapConnection(c_right_map, DIR_RIGHT, c_right_offset)
             self.connections['right'] = connection_right
+        if 'connection_up' in self.map.properties:
+            c_up_map = load_pygame(map_dir + self.map.properties['connection_up'] + ".tmx")
+            if 'c_up_offset' in self.map.properties:
+                c_up_offset = int(self.map.properties['c_up_offset'])
+            connection_up = MapConnection(c_up_map, DIR_UP, c_up_offset)
+            self.connections['up'] = connection_up
+        if 'connection_down' in self.map.properties:
+            c_down_map = load_pygame(map_dir + self.map.properties['connection_down'] + ".tmx")
+            if 'c_down_offset' in self.map.properties:
+                c_down_offset = int(self.map.properties['c_down_offset'])
+            connection_down = MapConnection(c_down_map, DIR_UP, c_down_offset)
+            self.connections['up'] = connection_down
 
 
 class MapConnection():
@@ -215,6 +238,15 @@ class MapConnection():
         if self.direction == DIR_LEFT:
             if 'left' in map.connections:
                 gameDisplay.blit(self.surface, ((-self.width * block_size)-cam.x,(self.offset * block_size)-cam.y))
+        elif self.direction == DIR_RIGHT:
+            if 'right' in map.connections:
+                gameDisplay.blit(self.surface, ((map.width * block_size)-cam.x,(self.offset * block_size)-cam.y))
+        if self.direction == DIR_UP:
+            if 'up' in map.connections:
+                gameDisplay.blit(self.surface, ((self.offset * block_size)-cam.x,(-self.height * block_size)-cam.y))
+        if self.direction == DIR_DOWN:
+            if 'down' in map.connections:
+                gameDisplay.blit(self.surface, ((self.offset * block_size)-cam.x,(map.height * block_size)-cam.y))
 
 
 class GameData:
@@ -237,7 +269,7 @@ class SaveData:
         self.game = gameData
 
     def export(self,file_path):
-        pass
+        loop.run_until_complete(engine.save_game_async(self, file_path))
 
 
 class AnimatedTile:
@@ -289,6 +321,7 @@ class Camera:
 
 class ScreenCover:
     def __init__(self):
+        self.type = 'cover'
         self.color = white
         self.visible = False
 
@@ -314,6 +347,7 @@ class Player:
         self.isMoving = False
         self.isBusy = False
         self.step = 0
+        self.m = 0
         self.spr_f = pygame.image.load('Player/Male/Gold.png')
         self.spr_down = pygame.transform.chop(pygame.transform.chop(self.spr_f, (32,0,0,0)), (32,32,128,128))
         self.spr_down_s0 = pygame.transform.chop(pygame.transform.chop(self.spr_f, (0,0,32,0)), (32,32,128,128))
@@ -341,21 +375,55 @@ class Player:
         if self.x % block_size == 0 and self.y % block_size == 0:
             if self.x == self.dest_x and self.y == self.dest_y:
                 if KEY_UP:
-                    self.dir = DIR_UP
-                    if get_tile_walkable(self.x,self.y - block_size, self.layer):
-                        self.move(0, -1)
+                    if self.dir != DIR_UP:
+                        self.dir = DIR_UP
+                        self.m = 0
+                    else:
+                        self.m += 1
+                    if self.m > 2:
+                        if not KEY_CODE:
+                            if get_tile_walkable(self.x,self.y - block_size, self.layer):
+                                self.move(0, -1)
+                        else:
+                            self.move(0, -1)
                 elif KEY_DOWN:
-                    self.dir = DIR_DOWN
-                    if get_tile_walkable(self.x, self.y + block_size, self.layer):
-                        self.move(0, 1)
+                    if self.dir != DIR_DOWN:
+                        self.dir = DIR_DOWN
+                        self.m = 0
+                    else:
+                        self.m += 1
+                    if self.m > 2:
+                        if not KEY_CODE:
+                            if get_tile_walkable(self.x, self.y + block_size, self.layer):
+                                self.move(0, 1)
+                        else:
+                            self.move(0, 1)
                 elif KEY_LEFT:
-                    self.dir = DIR_LEFT
-                    if get_tile_walkable(self.x - block_size, self.y, self.layer):
-                        self.move(-1, 0)
+                    if self.dir != DIR_LEFT:
+                        self.dir = DIR_LEFT
+                        self.m = 0
+                    else:
+                        self.m += 1
+                    if self.m > 2:
+                        if not KEY_CODE:
+                            if get_tile_walkable(self.x - block_size, self.y, self.layer):
+                                self.move(-1, 0)
+                        else:
+                            self.move(-1,0)
                 elif KEY_RIGHT:
-                    self.dir = DIR_RIGHT
-                    if get_tile_walkable(self.x + block_size, self.y, self.layer):
-                        self.move(1, 0)
+                    if self.dir != DIR_RIGHT:
+                        self.dir = DIR_RIGHT
+                        self.m = 0
+                    else:
+                        self.m += 1
+                    if self.m > 2:
+                        if not KEY_CODE:
+                            if get_tile_walkable(self.x + block_size, self.y, self.layer):
+                                self.move(1, 0)
+                        else:
+                            self.move(1,0)
+                else:
+                    self.m = 0
                 if KEY_A_DOWN:
                     if self.dir == DIR_UP and not self.isBusy:
                         for obj in map.obj_list:
@@ -693,6 +761,45 @@ class BerryTree:
 
 
 def on_enter_tile(x, y):
+    if x // block_size < 0 and ('connection_left' in map.properties):
+        connection = map.properties['connection_left']
+        offset = map.connections['left'].offset
+        unload_map()
+        load_map(connection)
+        player.x = (map.width - 1) * block_size
+        player.y = y + (offset * block_size)
+        player.dest_x = player.x
+        player.dest_y = player.y
+    elif x // block_size >= map.width and ('connection_right' in map.properties):
+        connection = map.properties['connection_right']
+        offset = map.connections['right'].offset
+        unload_map()
+        load_map(connection)
+        player.x = 0
+        player.y = y + (offset * block_size)
+        player.dest_x = player.x
+        player.dest_y = player.y
+    elif y // block_size < 0 and ('connection_up' in map.properties):
+        connection = map.properties['connection_up']
+        offset = map.connections['up'].offset
+        print('unload_map')
+        unload_map()
+        print('load_map')
+        load_map(connection)
+        player.x = x + (offset * block_size)
+        player.y = (map.height - 1) * block_size
+        player.dest_x = player.x
+        player.dest_y = player.y
+    elif y // block_size >= map.height and ('connection_down' in map.properties):
+        connection = map.properties['connection_down']
+        offset = map.connections['down'].offset
+        unload_map()
+        load_map(connection)
+        player.x = x + (offset * block_size)
+        player.y = 0
+        player.dest_x = player.x
+        player.dest_y = player.y
+        print(player.x,player.y)
     for obj in map.obj_list:
         if obj.type == "door":
             if obj.inside_box(x,y):
@@ -706,13 +813,43 @@ def on_enter_tile(x, y):
 
 def get_tile_walkable(x,y,layer=1):
     for obj in map.obj_list:
-        if obj.type == "door":
-            if obj.warp_type == "exit":
-                loop.run_until_complete(obj.warp())
-                player.dir = DIR_DOWN
-                player.dest_y = player.y + 32
-    if (x / block_size < 0 or x / block_size >= map.width) or (y / block_size < 0 or y / block_size >= map.height):
-        return False
+        if obj.x == x and obj.y == y:
+            if obj.type == "door":
+                if obj.warp_type == "exit":
+                    loop.run_until_complete(obj.warp())
+                    player.dir = DIR_DOWN
+                    player.dest_y = player.y + 32
+    # if (x / block_size < 0 or x / block_size >= map.width) or (y / block_size < 0 or y / block_size >= map.height):
+    #     return False
+    if x / block_size < 0:
+        if "left" in map.connections:
+            c_left = map.connections['left'].map
+            print((map.connections['left'].width - 1),(player.y+map.connections['left'].offset) // block_size, layer)
+            props = c_left.get_tile_properties((map.connections['left'].width - 1),(player.y+map.connections['left'].offset) // block_size, 1)
+            if props['isWalkable'] == "true":
+                return True
+            else:
+                return False
+        else:
+            return False
+    elif x / block_size >= map.width:
+        if "right" in map.connections:
+            props = map.connections['right'].map.get_tile_properties(0, (player.y+map.connections['right'].offset) / block_size, 1)
+            if props['isWalkable'] == "true":
+                return True
+            else:
+                return False
+        else:
+            return False
+    elif y / block_size < 0:
+        if "up" in map.connections:
+            props = map.connections['up'].map.get_tile_properties((x+map.connections['up'].offset) / block_size,map.connections['up'].height * block_size, 1)
+            if props['isWalkable'] == "true":
+                return True
+            else:
+                return False
+        else:
+            return False
     if (player.x == x and player.y == y) or (player.dest_x == x and player.dest_y == y):
         return False
     for obj in map.obj_list:
@@ -721,7 +858,7 @@ def get_tile_walkable(x,y,layer=1):
                 return False
     props = map.map.get_tile_properties(x / block_size, y / block_size, 1)
     if 'isWalkable' in props:
-        if props['isWalkable'] == "True":
+        if props['isWalkable'] == "true":
             return True
         else:
             return False
@@ -743,6 +880,7 @@ def main():
     global KEY_A_DOWN
     global KEY_A
     global KEY_NO_DIR
+    global KEY_CODE
     while not exit_game:
         KEY_A_DOWN = False
         for event in pygame.event.get():
@@ -773,9 +911,13 @@ def main():
                 if event.key == pygame.K_c:
                     KEY_A = True
                     KEY_A_DOWN = True
+                if event.key == pygame.K_LCTRL:
+                    KEY_CODE = True
             elif event.type == pygame.KEYUP:
                 if event.key == pygame.K_c:
                     KEY_A = False
+                if event.key == pygame.K_LCTRL:
+                    KEY_CODE = False
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_LSHIFT:
                     inMenu = True

@@ -4,7 +4,7 @@
   <property name="music" value="null"/>
  </properties>
  <tileset firstgid="1" name="GSC house 1" tilewidth="32" tileheight="32" tilecount="112" columns="8">
-  <image source="../GSC house 1.png" trans="ea00ff" width="256" height="448"/>
+  <image source="../Tilesets/GSC house 1.png" trans="ea00ff" width="256" height="448"/>
  </tileset>
  <layer name="Tile Layer 1" width="32" height="16">
   <data encoding="csv">
