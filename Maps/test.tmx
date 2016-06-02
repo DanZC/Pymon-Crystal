@@ -9,7 +9,7 @@
   <property name="region_size" value="1"/>
   <property name="region_x" type="int" value="0"/>
   <property name="region_y" type="int" value="0"/>
-  <property name="tile_border" value="treeborder_night.png"/>
+  <property name="tile_border" value="treeborder.png"/>
  </properties>
  <tileset firstgid="1" name="GSCoverworldjohtoday" tilewidth="32" tileheight="32" tilecount="1512" columns="8">
   <image source="../Tilesets/GSCoverworldjohtoday.png" trans="ff007f" width="256" height="6054"/>

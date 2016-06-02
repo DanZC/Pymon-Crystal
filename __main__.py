@@ -11,13 +11,14 @@ import pickle
 import io
 import pygame
 pygame.init()
-pygame.mixer.init(frequency=22050, size=-16, channels=2, buffer=40960)
+pygame.mixer.init(frequency=22050, size=-16, channels=4, buffer=40960)
 music = pygame.mixer.music
 pygame.font.init()
 Time = pygame.time
 clock = pygame.time.Clock()
 
 import pygame.midi
+pygame.midi.init()
 
 import math
 import time
@@ -27,6 +28,7 @@ import project
 from pytmx.util_pygame import load_pygame
 import datetime
 import os
+
 import types
 import asyncio
 from import_file import import_file
@@ -73,14 +75,30 @@ print('Setting up...')
 
 
 class SystemTime:
+    def get_hour(self) -> int:
+        return datetime.datetime.now().hour
 
-    def get_hour(self):
-        return datetime.time().hour
+    def get_minute(self) -> int:
+        return datetime.datetime.now().minute
 
-    def get_minute(self):
-        return datetime.time().minute
+    def get_weekday(self):
+        daynum = datetime.datetime.now().weekday()
+        if daynum == 6:
+            return "SUNDAY"
+        if daynum == 0:
+            return "MONDAY"
+        if daynum == 1:
+            return "TUESDAY"
+        if daynum == 2:
+            return "WEDNESDAY"
+        if daynum == 3:
+            return "THURSDAY"
+        if daynum == 4:
+            return "FRIDAY"
+        if daynum == 5:
+            return "SATURDAY"
 
-    def getTimeOfDay(self):
+    def get_time_of_day(self) -> str:
         if self.get_hour() >= 6 and self.get_hour() < 10:
             return "Morning"
         elif self.get_hour() >= 10 and self.get_hour() < 18:
@@ -94,9 +112,30 @@ systime = SystemTime()
 class Map:
     def __init__(self, map_):
         self.map = map_
+        if 'name' in map_.properties:
+            self.name = map_.properties['name']
+        else:
+            self.name = ""
+        if self.name not in gameData.map_flags:
+            gameData.map_flags[self.name] = []
+            for x in range(16):
+                gameData.map_flags[self.name].append(False)
+
         self.width = map_.width
         self.height = map_.height
         self.properties = map_.properties
+        if 'region_number' in map_.properties:
+            self.region = int(map_.properties['region_number'])
+        else:
+            self.region = 0
+        if 'region_x' in map_.properties:
+            self.region_x = int(map_.properties['region_x'])
+        else:
+            self.region_x = 0
+        if 'region_y' in map_.properties:
+            self.region_y = int(map_.properties['region_y'])
+        else:
+            self.region_y = 0
         self.connections = {}
         self.obj_list = []
         self.animated_tiles_0 = []
@@ -170,13 +209,12 @@ class Map:
     def load_map_border(self):
         if 'tile_border' in self.map.properties:
             self.tile_border_img = pygame.image.load(self.map.properties['tile_border'])
-            self.map_base = pygame.Surface((64 * (self.map.width + 8),64 * (self.map.height + 8)))
-            x = -64 * 6
-            y = -64 * 6
-            while x < 64 * (self.map.width + 6):
-                y = -64 * 6
-                while y < 64 * (self.map.height + 6):
-                    self.map_base.blit(self.tile_border_img, (x - cam.x, y - cam.y))
+            self.map_base = pygame.Surface((64 * (self.map.width + 3),64 * (self.map.height + 3)))
+            x = -64 * 3
+            while x < 64 * (self.map.width + 3):
+                y = -64 * 3
+                while y < 64 * (self.map.height + 3):
+                    self.map_base.blit(self.tile_border_img, (x, y))
                     y += 64
                 x += 64
 
@@ -257,6 +295,8 @@ class GameData:
         self.flags = []
         for x in range(100):
             self.flags.append(False)
+        self.map_flags = dict()
+        self.map_vars = dict()
 
 
 class SaveData:
@@ -267,9 +307,18 @@ class SaveData:
     def sync(self):
         self.player = player.data
         self.game = gameData
+        self.player_x = player.x
+        self.player_y = player.y
+        self.player_map = map
+        self.player_dir = player.dir
 
-    def export(self,file_path):
+    def export_(self,file_path):
         loop.run_until_complete(engine.save_game_async(self, file_path))
+
+    def import_(self,file_path):
+        global save
+        save = loop.run_until_complete(engine.load_game_async(self, file_path))
+        del self
 
 
 class AnimatedTile:
@@ -314,7 +363,7 @@ class Camera:
 
     def draw(self):
         if 'tile_border' in map.properties:
-            gameDisplay.blit(map.map_base, ((-64*6)-cam.x, (-64*6)-cam.y))
+            gameDisplay.blit(map.map_base, ((-64*3)-cam.x, (-64*3)-cam.y))
         else:
             gameDisplay.fill(black)
 
@@ -659,21 +708,13 @@ class Door:
         print('start')
         project.se_list[1].play()
         cover.visible = True
-        m = 0
-        while m < 8:
-            asyncio.sleep(2)
-            draw_all()
-            clock.tick(fps)
-            m += 1
+        yield from asyncio.sleep(0.1)
+        draw_all()
         engine.warp(self.dest_map, self.dest_x, self.dest_y)
-        asyncio.sleep(2)
+        yield from asyncio.sleep(0.1)
         cover.visible = False
-        m = 0
-        while m < 8:
-            asyncio.sleep(2)
-            draw_all()
-            clock.tick(fps)
-            m += 1
+        draw_all()
+        clock.tick(fps)
         print('end')
         print(player.x % block_size,player.y % block_size)
 
@@ -850,6 +891,15 @@ def get_tile_walkable(x,y,layer=1):
                 return False
         else:
             return False
+    elif y / block_size >= map.height:
+        if "down" in map.connections:
+            props = map.connections['down'].map.get_tile_properties((x+map.connections['down'].offset) / block_size,0, 1)
+            if props['isWalkable'] == "true":
+                return True
+            else:
+                return False
+        else:
+            return False
     if (player.x == x and player.y == y) or (player.dest_x == x and player.dest_y == y):
         return False
     for obj in map.obj_list:
@@ -862,6 +912,13 @@ def get_tile_walkable(x,y,layer=1):
             return True
         else:
             return False
+
+@asyncio.coroutine
+def screen_blink(seconds=1):
+    cover.visible = True
+    draw_all()
+    yield from asyncio.sleep(seconds)
+    cover.visible = False
 
 
 def init_all():
@@ -998,6 +1055,7 @@ def draw_all():
     player.draw()
     for element in ui_elements:
         element.draw()
+    cover.draw()
     winDisplay.blit(pygame.transform.scale(gameDisplay,(display_width * resolution_factor, display_height * resolution_factor),winDisplay),(0,0))
     pygame.display.update([0,0,display_width * resolution_factor,display_height * resolution_factor])
 
@@ -1013,6 +1071,7 @@ cam = Camera()
 obj_list = []
 ui_elements = []
 inMenu = False
+mainMenu = False
 cover = ScreenCover()
 load_map('test')
 player = Player()
@@ -1020,7 +1079,6 @@ gameData = GameData()
 save = SaveData()
 # pygame.display.set_icon(game_icon)
 print('Initializing game components...')
-init_all()
 exit_game = False
 if __name__ == '__main__':
     print('Entering main loop...')

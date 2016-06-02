@@ -1,10 +1,10 @@
 {"texts":{
-  "save_prompt_0":"Would you like to save%nthe game? %y(200)%q(4)",
+  "save_prompt_0":"Would you like to%nsave the game?",
   "save_overwrite":"There is already another%nsave file saved.%p%Is it okay to overwrite? %y(200)%q(4)",
-  "save_prompt_1":"SAVING...%nDO NOT TURN OFF THE POWER...",
+  "save_prompt_1":"SAVING...",
   "save_prompt_2":"%P saved%nthe game.",
   "save_warn":"WARNING!%pThere is a different save file%nsaved.%pIf you save now, the other%nsave's data will be lost.%pAre you sure you want to save the game? %y(300)%q(5)",
-  "save_error":"Save error.%pSomething went wrong during%nthe saving process.",
+  "save_error":"Save error.%pSomething went%nwrong during the%nsaving process.",
   "save_corrupted":"The save file has been%ncorrupted...",
   "time_sync_error":"ERROR%pCould not sync time in game%nwith time on computer.",
   "exec_error":"An error occurred during the processing%nof text.",

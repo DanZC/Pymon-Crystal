@@ -42,7 +42,7 @@ with open(data_dir + 'species.json') as json_data:
 x = 0
 species_list = []
 for mon in mon_list['species']:
-    new_mon = engine.MonSpecies(mon['name'],mon['stats'],mon['learnset'],mon['evolution'],mon['gender_ratio'],int(mon['catch_rate']))
+    new_mon = engine.MonSpecies(x,mon['name'],mon['stats'],mon['learnset'],mon['evolution'],mon['gender_ratio'],int(mon['catch_rate']))
     print('New mon, "' + new_mon.name + '," with an id of ' + str(x))
     species_list.append(new_mon)
     x += 1

@@ -166,5 +166,12 @@
     "type":"KEY ITEM",
     "can_use":"ONLYONMAP",
     "effect":{"type":"FISH","rod":"GOOD"}
+  },
+  {"name":"SUPER ROD",
+    "desc":"Use by water to fish for POKéMON.",
+    "price":0,
+    "type":"KEY ITEM",
+    "can_use":"ONLYONMAP",
+    "effect":{"type":"FISH","rod":"SUPER"}
   }
 ]}
