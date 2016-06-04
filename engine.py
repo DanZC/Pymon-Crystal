@@ -18,6 +18,7 @@ black = (0, 0, 0)
 pygame.font.init()
 font_size = 16
 font = pygame.font.Font('UI/font.ttf',font_size)
+font_right = pygame.font.Font('UI/font.ttf',font_size)
 
 mv_pattern_stationary = 0
 mv_pattern_look = 1
@@ -95,7 +96,7 @@ class MenuBox:
             self.options.append("{poke}GEAR")
         self.options.append(plyr.data.name)
         self.options.append("SAVE")
-        self.options.append("OPTION")
+        self.options.append("DEBUG")
         self.options.append("EXIT")
         self.topimg = pygame.image.load(__main__.ui_dir + 'menu_top.png')
         self.midimg = pygame.image.load(__main__.ui_dir + 'menu_mid.png')
@@ -129,9 +130,9 @@ class MenuBox:
                     __main__.loop.run_until_complete(show_text(project.str_list['save_error']))
             else:
                 clear_ui('text_box')
-        elif self.options[self.select] == "OPTION":
-            name = call_name_entry_screen()
-            __main__.player.data.name = name
+        elif self.options[self.select] == "DEBUG":
+            import debug
+            debug.call_debug_screen()
         elif self.options[self.select] == "POK{e}MON":
             print("pokemon selected")
         elif self.options[self.select] == "{poke}GEAR":
@@ -555,7 +556,6 @@ class NameEntryScreen:
                 else:
                     self.select = (0,self.select[1])
 
-
     def input(self,char):
         if len(self.name_string) < 8:
             self.name_string += char
@@ -610,6 +610,8 @@ class WildBattleScene:
         self.player_mon = self.player.data.party.get_first_able()
         self.plyr_battler = Battler(self.player_mon)
         self.exit = False
+        self.player_mon_img = pygame.image.load(__main__.ui_dir + '/player_mon_img.png')
+        self.battle_menu_bg = pygame.image.load(__main__.ui_dir + '/battle_menu.png')
 
     def move_option(self, direction):
         if self.option['list'] == 'main' or self.option['list'] == 'moves':
@@ -669,6 +671,7 @@ class WildBattleScene:
 
     def draw(self):
         gd = __main__.gameDisplay
+        gd.fill(white)
         if self.wild_mon.shiny:
             gd.blit(self.wild_mon.species.image_front_shiny,(184,6))
         else:
@@ -680,6 +683,31 @@ class WildBattleScene:
                 gd.blit(self.player_mon.species.image_back_shiny,(16,64))
             else:
                 gd.blit(self.player_mon.species.image_back,(16,64))
+            gd.blit(self.player_mon_img,(143,112))
+            origin = (143,112)
+            player_mon_nick = font.render(self.plyr_battler.mon.nickname,False,black)
+            gd.blit(player_mon_nick,(origin[0] + 17,origin[1]))
+            player_mon_lvl = font.render(str(self.plyr_battler.mon.level),False,black)
+            gd.blit(player_mon_lvl,(origin[0] + 97,origin[1] + 16))
+            if self.plyr_battler.mon.gender == 'm':
+                text = font.render(reformat_text("{m}"),False,black)
+            elif self.plyr_battler.mon.gender == "f":
+                text = font.render(reformat_text("{m}"),False,black)
+            else:
+                text = font.render('?',False,black)
+            gd.blit(text,(origin[0] + 129,origin[1] + 14))
+            hp = (0,0,0)
+            pygame.draw.rect(gd,
+                             hp,
+                             (origin[0] + 50,
+                              origin[1] + 38,
+                              96 * (self.plyr_battler.mon.current_hp / self.plyr_battler.mon.stat['hp']),
+                              4))
+            text = font_right.render(str(self.plyr_battler.mon.current_hp),False,black)
+            gd.blit(text,(origin[0] + 32,origin[1] + 48))
+            text = font_right.render(str(self.plyr_battler.mon.stat['hp']),False,black)
+            gd.blit(text,(origin[0] + 98,origin[1] + 48))
+            gd.blit(self.battle_menu_bg,(0,__main__.display_height - 96))
 
 
 class Battler:
@@ -771,6 +799,7 @@ class Mon:
         self.status = "NON"
         self.gender = self.generate_gender()
         self.item = project.item_list['?']
+        self.moves = []
 
     def generate_ivs(self):
         ivs = {"hp":0,"atk":0,"def":0,"spa":0,"spd":0,"spe":0}
@@ -823,7 +852,6 @@ class Mon:
             self.stat[key] = calc_stat
 
 
-
 class PlayerData:
     def __init__(self):
         self.name = 'PLAYER'
@@ -832,8 +860,10 @@ class PlayerData:
         self.isGirl = False
         self.numOfBadges = 0
         self.badges = [False,False,False,False,False,False,False,False]
-        self.party = []
-        self.party.append(Mon(project.species_list[3], 5))
+        self.party = Party()
+        self.party.add(Mon(project.species_list[3], 5))
+        self.on_bike = False
+        self.surfing = False
         self.hasDex = False
         self.hasGear = True
         self.gearMapCard = True
@@ -841,19 +871,25 @@ class PlayerData:
         self.gearRadioCard = False
         self.gearRadioEXPCard = False
         self.back_raw = pygame.image.load('Player/Male/trback000.png')
-        self.back = pygame.transform.chop(pygame.transform.chop(self.back_raw, (128,0,0,0)), (128,128,640,640))
+        self.back = pygame.transform.chop(pygame.transform.chop(self.back_raw, (128, 0, 0, 0)), (128,128,640,640))
         self.bag = Bag()
         self.bag.add_item('POTION')
-        self.bag.add_item('MAX POTION',8)
-        self.bag.add_item('ETHER',2)
-        self.bag.add_item('ELIXIR',6)
-        self.bag.add_item('FULL HEAL',4)
+        self.bag.add_item('MAX POTION', 8)
+        self.bag.add_item('ETHER', 2)
+        self.bag.add_item('ELIXIR', 6)
+        self.bag.add_item('FULL HEAL', 4)
         self.bag.add_item('BICYCLE')
 
 
 class Party:
     def __init__(self):
         self.mons = []
+
+    def add(self, mon):
+        if len(self.mons) < 6:
+            self.mons.append(mon)
+            return True
+        return False
 
     def get(self, index):
         if index < len(self.mons):
@@ -900,6 +936,9 @@ class Party:
                 continue
             n += 1
         return n
+
+    def __len__(self):
+        return len(self.mons)
 
 
 
@@ -1343,28 +1382,30 @@ def start_wild_battle(mon, level, shiny = False, fateful = False):
     battle = WildBattleScene(wild_mon)
     __main__.loop.run_until_complete(__main__.screen_blink(0.5))
     __main__.ui_elements.append(battle)
+    __main__.loop.run_until_complete(show_text(project.str_list['wild_battle_begin'].format(wild_mon.nickname)))
+    __main__.loop.run_until_complete(show_text(project.str_list['plyr_battle_send_out'].format(battle.plyr_battler.mon.nickname)))
+    battle.stage = 1
     pygame.event.clear()
     while not battle.exit:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
                 quit()
-            if event.key == pygame.K_DOWN:
-                battle.move_option(__main__.DIR_DOWN)
-            if event.key == pygame.K_UP:
-                battle.move_option(__main__.DIR_UP)
-            if event.key == pygame.K_RIGHT:
-                battle.move_option(__main__.DIR_RIGHT)
-            if event.key == pygame.K_LEFT:
-                battle.move_option(__main__.DIR_LEFT)
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_c:
                     battle.select_option()
+                if event.key == pygame.K_DOWN:
+                    battle.move_option(__main__.DIR_DOWN)
+                if event.key == pygame.K_UP:
+                    battle.move_option(__main__.DIR_UP)
+                if event.key == pygame.K_RIGHT:
+                    battle.move_option(__main__.DIR_RIGHT)
+                if event.key == pygame.K_LEFT:
+                    battle.move_option(__main__.DIR_LEFT)
             if battle.exit:
                 break
         __main__.draw_all()
         __main__.clock.tick(__main__.fps)
-
     __main__.loop.run_until_complete(__main__.screen_blink(0.5))
     __main__.ui_elements.remove(battle)
     del battle

@@ -5,6 +5,9 @@ import engine
 
 data_dir = 'Data/'
 
+NUM_OF_FLAGS = 100
+NUM_OF_VARS = 100
+
 print('Compiling databases...')
 
 me_list = []

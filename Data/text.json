@@ -64,5 +64,8 @@
   "receive_item":"%P received%n{}.",
   "item_in_bag":"%P put the%n{} in the%p{}.",
   "find_item":"%P obtained%n{}.",
+  "no_use":"This isn't the time%nto use that!",
+  "surf_ask":"Would you like to%nsurf?",
+  "surf_use":"{} used SURF!",
   "success":"The text compiled successfully!"
 }}
