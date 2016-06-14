@@ -1,18 +1,20 @@
-{"moves":{
-  "STRUGGLE":{
+{"moves":[
+  {"name":"STRUGGLE",
     "power":1,
     "type":"???",
     "pp":0,
-    "effect":{"type":"SINGLE_HIT"}
+    "accuracy":255,
+    "effect":{"type":"SINGLE_HIT"},
+    "secondary":{"type":"RECOIL"}
   },
-  "POUND":{
+  {"name":"POUND",
     "type":"NORMAL",
     "pp":35,
     "power":40,
     "accuracy":100,
     "effect":{"type":"SINGLE_HIT"}
   },
-  "KARATE CHOP":{
+  {"name":"KARATE CHOP",
     "type":"FIGHTING",
     "pp":25,
     "power":50,
@@ -20,28 +22,28 @@
     "effect":{"type":"SINGLE_HIT"},
     "critical_plus":true
   },
-  "DOUBLESLAP":{
+  {"name":"DOUBLESLAP",
     "type":"NORMAL",
     "pp":10,
     "power":15,
     "accuracy":85,
     "effect":{"type":"MULTI_HIT"}
   },
-  "COMET PUNCH":{
+  {"name":"COMET PUNCH",
     "type":"NORMAL",
     "pp":15,
     "power":18,
     "accuracy":85,
     "effect":{"type":"MULTI_HIT"}
   },
-  "MEGA PUNCH":{
+  {"name":"MEGA PUNCH",
     "type":"NORMAL",
     "pp":20,
     "power":80,
     "accuracy":85,
     "effect":{"type":"SINGLE_HIT"}
   },
-  "PAY DAY":{
+  {"name":"PAY DAY",
     "type":"NORMAL",
     "pp":20,
     "power":40,
@@ -49,7 +51,7 @@
     "effect":{"type":"SINGLE_HIT"},
     "secondary":{"type":"PAY_DAY"}
   },
-  "FIRE PUNCH":{
+  {"name":"FIRE PUNCH",
     "type":"FIRE",
     "pp":15,
     "power":75,
@@ -57,7 +59,7 @@
     "effect":{"type":"SINGLE_HIT"},
     "secondary":{"type":"BURN","chance":10}
   },
-  "ICE PUNCH":{
+  {"name":"ICE PUNCH",
     "type":"ICE",
     "pp":15,
     "power":75,
@@ -65,7 +67,7 @@
     "effect":{"type":"SINGLE_HIT"},
     "secondary":{"type":"FREEZE","chance":10}
   },
-  "THUNDER PUNCH":{
+  {"name":"THUNDER PUNCH",
     "type":"ELECTRIC",
     "pp":15,
     "power":75,
@@ -73,28 +75,28 @@
     "effect":{"type":"SINGLE_HIT"},
     "secondary":{"type":"PARALYSIS","chance":10}
   },
-  "SCRATCH":{
+  {"name":"SCRATCH",
     "type":"NORMAL",
     "pp":35,
     "power":40,
     "accuracy":100,
     "effect":{"type":"SINGLE_HIT"}
   },
-  "GUILLOTINE":{
+  {"name":"GUILLOTINE",
     "type":"NORMAL",
     "pp":5,
     "power":0,
     "accuracy":0,
     "effect":{"type":"OHKO"}
   },
-  "SWORDS DANCE":{
+  {"name":"SWORDS DANCE",
     "type":"NORMAL",
     "pp":30,
     "power":0,
     "accuracy":255,
     "effect":{"type":"STAT_UP", "stat":"ATTACK", "amount":2}
   },
-  "CUT":{
+  {"name":"CUT",
     "type":"NORMAL",
     "pp":30,
     "power":50,
@@ -102,21 +104,28 @@
     "effect":{"type":"SINGLE_HIT"},
     "field_effect":"CUT"
   },
-  "GUST":{
+  {"name":"GUST",
     "type":"FLYING",
     "pp":35,
     "power":40,
     "accuracy":100,
     "effect":{"type":"SINGLE_HIT"}
   },
-  "WING ATTACK":{
+  {"name":"WING ATTACK",
     "type":"FLYING",
     "pp":35,
     "power":60,
     "accuracy":100,
     "effect":{"type":"SINGLE_HIT"}
   },
-  "ROCK SMASH":{
+  {"name":"FLY",
+    "type":"FLYING",
+    "pp":15,
+    "power":90,
+    "accuracy":95,
+    "effect":{"type":"TWO_TURN","invulnerable_on_first":true}
+  },
+  {"name":"ROCK SMASH",
     "type":"FIGHTING",
     "pp":15,
     "power":20,
@@ -125,18 +134,18 @@
     "secondary":{"type":"STAT_DOWN","chance":50},
     "field_effect":"ROCK_SMASH"
   },
-  "BEAT UP":{
+  {"name":"BEAT UP",
     "type":"DARK",
     "pp":10,
     "power":10,
     "accuracy":100,
     "effect":{"type":"BEAT_UP"}
   },
-  "?":{
+  {"name":"?",
     "type":"???",
     "pp":0,
     "power":1,
     "accuracy":100,
     "effect":{"type":"SINGLE_HIT"}
   }
-}}
+]}

@@ -10,32 +10,43 @@ import random
 import pickle
 import io
 import gc
-gc.get_stats()
+import os
+import sys
 import pygame
+import pygame.midi
+from pytmx.util_pygame import load_pygame
+import datetime
+import types
+import asyncio
+from import_file import import_file
+
+
+# def get_path(relative_path):
+#     """ Get absolute path to resource, works for dev and for PyInstaller """
+#     if hasattr(sys, '_MEIPASS'):
+#         return os.path.join(sys._MEIPASS, relative_path)
+#     return os.path.join(os.path.abspath("."), relative_path)
+
+
+if getattr(sys, 'frozen', False):
+    os.chdir(sys._MEIPASS)
+
+
+loop = asyncio.get_event_loop()
+
+
 pygame.init()
 pygame.mixer.init(frequency=22050, size=-16, channels=4, buffer=40960)
 music = pygame.mixer.music
 pygame.font.init()
 Time = pygame.time
 clock = pygame.time.Clock()
-
-import pygame.midi
 pygame.midi.init()
 
-import math
-import time
-from time import time
 import engine
 import project
-from pytmx.util_pygame import load_pygame
-import datetime
-import os
 
-import types
-import asyncio
-from import_file import import_file
-
-game_title = ''
+game_title = 'Pymon Crystal'
 # game_icon = pygame.image.load('icon.png')
 
 red = (255, 0, 0)
@@ -107,6 +118,11 @@ class SystemTime:
             return "Day"
         else:
             return "Night"
+
+    def get_date(self) -> str:
+        return str(datetime.datetime.now().month) + '/' + str(datetime.datetime.now().day) + '/' + str(
+            datetime.datetime.now().year)
+
 
 systime = SystemTime()
 
@@ -1193,35 +1209,6 @@ def unload_map():
     del map
 
 
-# def load_map_from_connection(dir):
-#     if dir == DIR_LEFT:
-#         global map
-#         name = map.properties['connection_left']
-#         del map
-#         map = load_pygame(map_dir + name + '.tmx')
-#         player.x += connection_left.width; player.y -= c_left_offset
-#         del connection_left
-#         del c_left_offset
-#     elif dir == DIR_RIGHT:
-#         global map
-#         name = map.properties['connection_right']
-#         del map
-#         map = load_pygame(map_dir + name + '.tmx')
-#         player.x -= connection_right.width; player.y -= c_right_offset
-#     elif dir == DIR_UP:
-#         global map
-#         name = map.properties['connection_up']
-#         del map
-#         map = load_pygame(map_dir + name + '.tmx')
-#         player.y += connection_up.height; player.x -= c_up_offset
-#     elif dir == DIR_DOWN:
-#         global map
-#         name = map.properties['connection_down']
-#         del map
-#         map = load_pygame(map_dir + name + '.tmx')
-#         player.y -= connection_down.height; player.x -= c_down_offset
-
-
 def draw_all():
     if cam.center_on_player:
         cam.realign()
@@ -1241,15 +1228,16 @@ def draw_all():
     winDisplay.blit(pygame.transform.scale(gameDisplay,(display_width * resolution_factor, display_height * resolution_factor),winDisplay),(0,0))
     pygame.display.update([0,0,display_width * resolution_factor,display_height * resolution_factor])
 
+
 def show_text(string,keep_open = False):
     loop.run_until_complete(engine.show_text(string,keep_open))
+
 
 print('Open game window...')
 gameDisplay = pygame.Surface((display_width, display_height))
 winDisplay = pygame.display.set_mode((display_width * resolution_factor, display_height * resolution_factor))
 pygame.display.update()
 pygame.display.set_caption(game_title)
-loop = asyncio.get_event_loop()
 inEvent = False
 cam = Camera()
 obj_list = []

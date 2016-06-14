@@ -37,15 +37,45 @@ with open(data_dir + 'types.json') as json_data:
 for type in types_list['types']:
     type_list[type] = type
     print("New type,",type_list[type])
+del types_list
 
 move_list = {}
+with open(data_dir + 'moves.json') as json_data:
+    moves = json.load(json_data)
+for move in moves['moves']:
+    if 'secondary' in move:
+        if 'field_effect' in move:
+            move_entry = engine.Move(
+                move,int(move['pp']),int(move['power']),int(move['accuracy']),move['type'],
+                move['effect'],move['secondary'],move['field_effect'])
+        else:
+            move_entry = engine.Move(
+                move,int(move['pp']),int(move['power']),int(move['accuracy']),move['type'],
+                move['effect'],move['secondary'])
+    elif 'field_effect' in move:
+        move_entry = engine.Move(
+            move,int(move['pp']),int(move['power']),int(move['accuracy']),move['type'],
+            move['effect'],field_effect=move['field_effect'])
+    else:
+        move_entry = engine.Move(move,int(move['pp']),int(move['power']),int(move['accuracy']),move['type'],move['effect'])
+    move_list[move['name']] = move_entry
+    print("New move,",move_entry.name,"with a type of",move_entry.type)
+del moves
 
 with open(data_dir + 'species.json') as json_data:
     mon_list = json.load(json_data)
 x = 0
 species_list = []
 for mon in mon_list['species']:
-    new_mon = engine.MonSpecies(x,mon['name'],mon['stats'],mon['learnset'],mon['evolution'],mon['gender_ratio'],int(mon['catch_rate']))
+    mv_dict = {}
+    for move_l in mon['learnset']:
+        for n in range(100):
+            if str(n) in move_l:
+                list_0 = []
+                for move in move_l[str(n)]:
+                    list_0.append(move_list[move])
+                mv_dict[str(n)] = list_0
+    new_mon = engine.MonSpecies(x,mon['name'],mon['stats'],mv_dict,mon['evolution'],mon['gender_ratio'],int(mon['catch_rate']))
     print('New mon, "' + new_mon.name + '," with an id of ' + str(x))
     species_list.append(new_mon)
     x += 1

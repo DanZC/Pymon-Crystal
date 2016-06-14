@@ -1,7 +1,10 @@
 {"species": [
   {"name": "?", "type":["???"],
     "stats": {"hp": 100, "atk": 100, "def": 100, "spa": 100, "spd": 100, "spe": 100},
-    "learnset":{},
+    "learnset":
+    [{
+      "1":["PAY DAY", "SWORDS DANCE"]
+    }],
     "evolution":[],
     "egg_yield":"?",
     "egg_group":["UNDISCOVERED"],
@@ -11,8 +14,10 @@
   {"name": "BULBASAUR", "type":["GRASS","POISON"],
     "stats": {"hp": 100, "atk": 100, "def": 100, "spa": 100, "spd": 100, "spe": 100},
     "learnset":
-    {"0":["TACKLE","GROWL"],
-      "7":["VINEWHIP"]},
+    [{
+      "1":["SCRATCH","CUT"],
+      "7":["CUT"]
+    }],
     "evolution":[{"method":"LEVEL","condition":16,"evolved":"IVYSAUR"}],
     "egg_yield":"BULBASAUR",
     "egg_group":["MONSTER"],
@@ -22,8 +27,10 @@
   {"name": "IVYSAUR", "type":["GRASS","POISON"],
     "stats": {"hp": 100, "atk": 100, "def": 100, "spa": 100, "spd": 100, "spe": 100},
     "learnset":
-    {"0":["TACKLE","GROWL"],
-      "7":["VINEWHIP"]},
+    [{
+      "1":["SCRATCH","CUT"],
+      "7":["CUT"]
+    }],
     "evolution":[{"method":"LEVEL","condition":36,"evolved":"VENUSAUR"}],
     "egg_yield":"BULBASAUR",
     "egg_group":["MONSTER"],
@@ -33,9 +40,11 @@
   {"name": "VENUSAUR", "type":["GRASS","POISON"],
     "stats": {"hp": 100, "atk": 100, "def": 100, "spa": 100, "spd": 100, "spe": 100},
     "learnset":
-    {"0":["TACKLE","GROWL"],
-      "7":["VINEWHIP"]},
-    "evolution":[{"method":"LEVEL","condition":36,"evolved":"VENUSAUR"}],
+    [{
+      "1":["SCRATCH","CUT"],
+      "7":["CUT"]
+    }],
+    "evolution":[],
     "egg_yield":"BULBASAUR",
     "egg_group":["MONSTER"],
     "gender_ratio":"MALE_75%",
@@ -44,9 +53,11 @@
   {"name": "CHARMANDER", "type":["FIRE"],
     "stats": {"hp": 100, "atk": 100, "def": 100, "spa": 100, "spd": 100, "spe": 100},
     "learnset":
-    {"0":["TACKLE","GROWL"],
-      "7":["VINEWHIP"]},
-    "evolution":[{"method":"LEVEL","condition":36,"evolved":"VENUSAUR"}],
+    [{
+      "0":["SCRATCH","CUT"],
+      "7":["CUT"]
+    }],
+    "evolution":[{"method":"LEVEL","condition":36,"evolved":"CHARMELEON"}],
     "egg_yield":"BULBASAUR",
     "egg_group":["MONSTER"],
     "gender_ratio":"MALE_75%",

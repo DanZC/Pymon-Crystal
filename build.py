@@ -4,7 +4,8 @@ import time
 from glob import glob
 
 file_list = []
-dir_list = ['Data/','Encounters/','EventScripts/','ME/','Maps/','Music/','Sounds/','Sprites/','Tilesets/','UI/']
+dir_list = ['Data/','Encounters/','EventScripts/','Battlers/Mons/','Battlers/Trainers/','Player/','Player/Male/','Player/Female/',
+            'ME/','Maps/','Music/','Sounds/','Sprites/','Tilesets/','UI/']
 for cdir in dir_list:
     for f in os.listdir(cdir):
         if os.path.isfile(os.path.join(cdir,f)):
@@ -37,7 +38,6 @@ with open("header.bin", "w") as yo:
 
 with open("data.bin", "wb") as byteio:
     for file in file_list:
-        time.sleep(1)
         for byte in file['f']:
             byteio.write(byte)
         print(file['name'],' written.')
