@@ -1,5 +1,5 @@
-{"types":{
-  "???":{
+{"types":[
+  {"name":"???",
     "???":0,
     "NORMAL":1,
     "FIGHTING":1,
@@ -20,12 +20,12 @@
     "DARK":1,
     "category":"PHYSICAL"
   },
-  "NORMAL":{
+  {"name":"NORMAL",
     "FIGHTING":2,
     "GHOST":0,
     "category":"PHYSICAL"
   },
-  "FIGHTING":{
+  {"name":"FIGHTING",
     "FLYING":2,
     "PSYCHIC":2,
     "ROCK":0.5,
@@ -33,7 +33,7 @@
     "DARK":0.5,
     "category":"PHYSICAL"
   },
-  "FLYING":{
+  {"name":"FLYING",
     "ROCK":2,
     "ELECTRIC":2,
     "ICE":2,
@@ -43,7 +43,7 @@
     "GROUND":0,
     "category":"PHYSICAL"
   },
-  "POISON":{
+  {"name":"POISON",
     "GROUND":2,
     "PSYCHIC":2,
     "FIGHTING":0.5,
@@ -52,7 +52,7 @@
     "GRASS":0.5,
     "category":"PHYSICAL"
   },
-  "GROUND":{
+  {"name":"GROUND",
     "WATER":2,
     "GRASS":2,
     "ICE":2,
@@ -61,7 +61,7 @@
     "ELECTRIC":0,
     "category":"PHYSICAL"
   },
-  "ROCK":{
+  {"name":"ROCK",
     "WATER":2,
     "GRASS":2,
     "FIGHTING":2,
@@ -73,7 +73,7 @@
     "FIRE":0.5,
     "category":"PHYSICAL"
   },
-  "BUG":{
+  {"name":"BUG",
     "FIRE":2,
     "FLYING":2,
     "ROCK":2,
@@ -82,7 +82,7 @@
     "FIGHTING":0.5,
     "category":"PHYSICAL"
   },
-  "GHOST":{
+  {"name":"GHOST",
     "GHOST":2,
     "DARK":2,
     "BUG":0.5,
@@ -91,7 +91,7 @@
     "FIGHTING":0,
     "category":"PHYSICAL"
   },
-  "FIRE":{
+  {"name":"FIRE",
     "GROUND":2,
     "WATER":2,
     "ROCK":2,
@@ -102,7 +102,7 @@
     "STEEL":0.5,
     "category":"SPECIAL"
   },
-  "WATER":{
+  {"name":"WATER",
     "ELECTRIC":2,
     "GRASS":2,
     "FIRE":0.5,
@@ -111,7 +111,7 @@
     "ICE":0.5,
     "category":"SPECIAL"
   },
-  "GRASS":{
+  {"name":"GRASS",
     "FIRE":2,
     "FLYING":2,
     "POISON":2,
@@ -123,14 +123,14 @@
     "ELECTRIC":0.5,
     "category":"SPECIAL"
   },
-  "ELECTRIC":{
+  {"name":"ELECTRIC",
     "GROUND":2,
     "ELECTRIC":0.5,
     "FLYING":0.5,
     "STEEL":0.5,
     "category":"SPECIAL"
   },
-  "PSYCHIC":{
+  {"name":"PSYCHIC",
     "BUG":2,
     "GHOST":2,
     "DARK":2,
@@ -138,7 +138,7 @@
     "FIGHTING":0.5,
     "category":"SPECIAL"
   },
-  "ICE":{
+  {"name":"ICE",
     "FIGHTING":2,
     "FIRE":2,
     "ROCK":2,
@@ -146,7 +146,7 @@
     "ICE":0.5,
     "category":"SPECIAL"
   },
-  "DRAGON":{
+  {"name":"DRAGON",
     "DRAGON":2,
     "ICE":2,
     "ELECTRIC":0.5,
@@ -155,7 +155,7 @@
     "WATER":0.5,
     "category":"PHYSICAL"
   },
-  "STEEL":{
+  {"name":"STEEL",
     "FIRE":2,
     "FIGHTING":2,
     "GROUND":2,
@@ -173,7 +173,7 @@
     "POISON":0,
     "category":"PHYSICAL"
   },
-  "DARK":{
+  {"name":"DARK",
     "BUG":2,
     "FIGHTING":2,
     "DARK":0.5,
@@ -181,5 +181,5 @@
     "PSYCHIC":0,
     "category":"PHYSICAL"
   }
-}
+]
 }

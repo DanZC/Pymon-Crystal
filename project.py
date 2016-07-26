@@ -1,12 +1,10 @@
+from const import *
 import pygame
 import json
 import __main__
 import engine
 
 data_dir = 'Data/'
-
-NUM_OF_FLAGS = 100
-NUM_OF_VARS = 100
 
 print('Compiling databases...')
 
@@ -35,8 +33,8 @@ type_list = {}
 with open(data_dir + 'types.json') as json_data:
     types_list = json.load(json_data)
 for type in types_list['types']:
-    type_list[type] = type
-    print("New type,",type_list[type])
+    type_list[type['name']] = type
+    print("New type,",type_list[type['name']])
 del types_list
 
 move_list = {}
@@ -75,7 +73,16 @@ for mon in mon_list['species']:
                 for move in move_l[str(n)]:
                     list_0.append(move_list[move])
                 mv_dict[str(n)] = list_0
-    new_mon = engine.MonSpecies(x,mon['name'],mon['stats'],mv_dict,mon['evolution'],mon['gender_ratio'],int(mon['catch_rate']))
+    new_mon = engine.MonSpecies(
+        species_id=x,
+        name=mon['name'],
+        base_stats=mon['stats'],
+        type=mon['type'],
+        learnset=mv_dict,
+        evolutions=mon['evolution'],
+        gender_ratio=mon['gender_ratio'],
+        catchrate=int(mon['catch_rate'])
+    )
     print('New mon, "' + new_mon.name + '," with an id of ' + str(x))
     species_list.append(new_mon)
     x += 1

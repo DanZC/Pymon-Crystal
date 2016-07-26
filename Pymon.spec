@@ -2,11 +2,24 @@
 
 block_cipher = None
 
+added_files = [
+         ( './Data', 'Data' ),
+         ( './UI', 'UI' ),
+         ( './Maps/*.tmx', 'Maps' ),
+	 ( './Sprites', 'Sprites' ),
+	 ( './Tilesets', 'Tilesets' ),
+	 ( './Battlers', 'Battlers' ),
+	 ( './EventScripts', 'EventScripts' ),
+	 ( './Player', 'Player' ),
+	 ( './Music', 'Music' ),
+	 ( './ME', 'ME' ),
+	 ( './Sounds', 'Sounds' ),
+         ]
 
 a = Analysis(['__main__.py'],
              pathex=['C:\\Users\\Matt\\Desktop\\PyGame'],
              binaries=None,
-             datas=None,
+             datas=added_files,
              hiddenimports=[],
              hookspath=[],
              runtime_hooks=[],
@@ -21,8 +34,8 @@ exe = EXE(pyz,
           a.binaries,
           a.zipfiles,
           a.datas,
-          name='PyGame',
+          name='Pymon',
           debug=False,
           strip=False,
           upx=True,
-          console=True )
+          console=False )

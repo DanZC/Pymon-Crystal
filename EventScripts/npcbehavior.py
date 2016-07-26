@@ -1,6 +1,6 @@
 import asyncio
 import __main__
-import engine
+from engine import show_text
 
 
 def __init__(npc_obj):
@@ -12,8 +12,9 @@ def __init__(npc_obj):
     else:
         text = '...'
 
+
 def run():
     npc.turn_toward_player()
     __main__.inEvent = True
-    __main__.loop.run_until_complete(engine.show_text(text))
+    show_text(text)
     __main__.inEvent = False

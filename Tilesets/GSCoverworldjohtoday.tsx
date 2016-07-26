@@ -8191,18 +8191,48 @@
    <property name="isAnimated" value="False"/>
    <property name="isWalkable" type="bool" value="false"/>
   </properties>
+  <animation>
+   <frame tileid="1440" duration="100"/>
+   <frame tileid="1441" duration="100"/>
+   <frame tileid="1442" duration="100"/>
+   <frame tileid="1443" duration="100"/>
+   <frame tileid="1444" duration="100"/>
+   <frame tileid="1445" duration="100"/>
+   <frame tileid="1446" duration="100"/>
+   <frame tileid="1447" duration="100"/>
+  </animation>
  </tile>
  <tile id="1364">
   <properties>
    <property name="isAnimated" value="False"/>
    <property name="isWalkable" type="bool" value="false"/>
   </properties>
+  <animation>
+   <frame tileid="1456" duration="100"/>
+   <frame tileid="1457" duration="100"/>
+   <frame tileid="1458" duration="100"/>
+   <frame tileid="1459" duration="100"/>
+   <frame tileid="1460" duration="100"/>
+   <frame tileid="1461" duration="100"/>
+   <frame tileid="1462" duration="100"/>
+   <frame tileid="1463" duration="100"/>
+  </animation>
  </tile>
  <tile id="1365">
   <properties>
    <property name="isAnimated" value="False"/>
    <property name="isWalkable" type="bool" value="false"/>
   </properties>
+  <animation>
+   <frame tileid="1472" duration="100"/>
+   <frame tileid="1473" duration="100"/>
+   <frame tileid="1474" duration="100"/>
+   <frame tileid="1475" duration="100"/>
+   <frame tileid="1476" duration="100"/>
+   <frame tileid="1477" duration="100"/>
+   <frame tileid="1478" duration="100"/>
+   <frame tileid="1479" duration="100"/>
+  </animation>
  </tile>
  <tile id="1366">
   <properties>
@@ -8239,18 +8269,48 @@
    <property name="isAnimated" value="False"/>
    <property name="isWalkable" type="bool" value="false"/>
   </properties>
+  <animation>
+   <frame tileid="1488" duration="100"/>
+   <frame tileid="1489" duration="100"/>
+   <frame tileid="1490" duration="100"/>
+   <frame tileid="1491" duration="100"/>
+   <frame tileid="1492" duration="100"/>
+   <frame tileid="1493" duration="100"/>
+   <frame tileid="1494" duration="100"/>
+   <frame tileid="1495" duration="100"/>
+  </animation>
  </tile>
  <tile id="1372">
   <properties>
    <property name="isAnimated" value="False"/>
    <property name="isWalkable" type="bool" value="false"/>
   </properties>
+  <animation>
+   <frame tileid="1424" duration="100"/>
+   <frame tileid="1425" duration="100"/>
+   <frame tileid="1426" duration="100"/>
+   <frame tileid="1427" duration="100"/>
+   <frame tileid="1428" duration="100"/>
+   <frame tileid="1429" duration="100"/>
+   <frame tileid="1430" duration="100"/>
+   <frame tileid="1431" duration="100"/>
+  </animation>
  </tile>
  <tile id="1373">
   <properties>
    <property name="isAnimated" value="False"/>
    <property name="isWalkable" type="bool" value="false"/>
   </properties>
+  <animation>
+   <frame tileid="1504" duration="100"/>
+   <frame tileid="1505" duration="100"/>
+   <frame tileid="1506" duration="100"/>
+   <frame tileid="1507" duration="100"/>
+   <frame tileid="1508" duration="100"/>
+   <frame tileid="1509" duration="100"/>
+   <frame tileid="1510" duration="100"/>
+   <frame tileid="1511" duration="100"/>
+  </animation>
  </tile>
  <tile id="1374">
   <properties>
@@ -8287,6 +8347,16 @@
    <property name="isAnimated" value="False"/>
    <property name="isWalkable" type="bool" value="false"/>
   </properties>
+  <animation>
+   <frame tileid="1520" duration="100"/>
+   <frame tileid="1521" duration="100"/>
+   <frame tileid="1522" duration="100"/>
+   <frame tileid="1523" duration="100"/>
+   <frame tileid="1524" duration="100"/>
+   <frame tileid="1525" duration="100"/>
+   <frame tileid="1526" duration="100"/>
+   <frame tileid="1527" duration="100"/>
+  </animation>
  </tile>
  <tile id="1380">
   <properties>
@@ -8299,6 +8369,16 @@
    <property name="isAnimated" value="False"/>
    <property name="isWalkable" type="bool" value="false"/>
   </properties>
+  <animation>
+   <frame tileid="1536" duration="100"/>
+   <frame tileid="1537" duration="100"/>
+   <frame tileid="1538" duration="100"/>
+   <frame tileid="1539" duration="100"/>
+   <frame tileid="1540" duration="100"/>
+   <frame tileid="1541" duration="100"/>
+   <frame tileid="1542" duration="100"/>
+   <frame tileid="1543" duration="100"/>
+  </animation>
  </tile>
  <tile id="1382">
   <properties>
@@ -8498,6 +8578,16 @@
    <property name="isWalkable" type="bool" value="false"/>
    <property name="terrain" value="water"/>
   </properties>
+  <animation>
+   <frame tileid="1512" duration="100"/>
+   <frame tileid="1513" duration="100"/>
+   <frame tileid="1514" duration="100"/>
+   <frame tileid="1515" duration="100"/>
+   <frame tileid="1516" duration="100"/>
+   <frame tileid="1517" duration="100"/>
+   <frame tileid="1518" duration="100"/>
+   <frame tileid="1519" duration="100"/>
+  </animation>
  </tile>
  <tile id="1404">
   <properties>

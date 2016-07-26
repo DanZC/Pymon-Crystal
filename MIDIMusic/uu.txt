@@ -1,0 +1,18 @@
+NOP
+GOTO 0xnn nn nn nn
+CALL 0xnn nn nn nn
+COMP 0xnn nn nn nn, vvvv
+IF 0x0n GOTO 0xnn nn nn nn
+IF 0x0n CALL 0xnn nn nn nn
+SET 0xnn nn nn nn, vvvv
+VAR "nnnn", 0b
+CMPV @"nnnn", vvvv
+WNDW wwww hhhh
+CLWN
+EXWN
+DRW xx, yy, 0ccc
+HZ nn nF
+LHZ nn nF
+FLIP
+GETINPUT nn nn, nn nn
+7RPXN-TV4DV-3GB2R-Q7KWD-49CHH

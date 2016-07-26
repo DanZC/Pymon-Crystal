@@ -58,7 +58,33 @@
       "7":["CUT"]
     }],
     "evolution":[{"method":"LEVEL","condition":36,"evolved":"CHARMELEON"}],
-    "egg_yield":"BULBASAUR",
+    "egg_yield":"CHARMANDER",
+    "egg_group":["MONSTER"],
+    "gender_ratio":"MALE_75%",
+    "catch_rate":45
+  },
+  {"name": "CHARMELEON", "type":["FIRE"],
+    "stats": {"hp": 100, "atk": 100, "def": 100, "spa": 100, "spd": 100, "spe": 100},
+    "learnset":
+    [{
+      "0":["SCRATCH","CUT"],
+      "7":["CUT"]
+    }],
+    "evolution":[{"method":"LEVEL","condition":36,"evolved":"CHARIZARD"}],
+    "egg_yield":"CHARMANDER",
+    "egg_group":["MONSTER"],
+    "gender_ratio":"MALE_75%",
+    "catch_rate":45
+  },
+  {"name": "CHARIZARD", "type":["FIRE", "FLYING"],
+    "stats": {"hp": 100, "atk": 100, "def": 100, "spa": 100, "spd": 100, "spe": 100},
+    "learnset":
+    [{
+      "0":["SCRATCH","CUT"],
+      "7":["CUT"]
+    }],
+    "evolution":[],
+    "egg_yield":"CHARMANDER",
     "egg_group":["MONSTER"],
     "gender_ratio":"MALE_75%",
     "catch_rate":45

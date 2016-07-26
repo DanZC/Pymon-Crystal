@@ -1,4 +1,5 @@
-﻿import pygame
+﻿from const import *
+import pygame
 from threading import Thread
 import time
 import __main__
@@ -10,35 +11,10 @@ import asyncio
 import csv
 from pytmx.util_pygame import load_pygame
 
-red = (255, 0, 0)
-blue = (0, 0, 255)
-green = (0, 255, 0)
-yellow = (255, 255, 0)
-white = (255, 255, 255)
-black = (0, 0, 0)
-
-ALIGN_LEFT = 0
-ALIGN_RIGHT = 0
-
 pygame.font.init()
 font_size = 16
 font = pygame.font.Font('UI/font.ttf', font_size)
 font_right = pygame.font.Font('UI/font.ttf', font_size)
-
-mv_pattern_stationary = 0
-mv_pattern_look = 1
-mv_pattern_walk = 2
-mv_pattern_look_clockw = 3
-mv_pattern_look_cclockw = 4
-mv_pattern_walk_ln_h = 5
-mv_pattern_walk_ln_v = 6
-mv_pattern_player = 7
-
-ATK = 'ATK'
-DEF = 'DEF'
-SPA = 'SP. ATK'
-SPD = 'SP. DEF'
-SPE = 'SPEED'
 
 
 class AnimatedSprite:
@@ -74,14 +50,20 @@ class Text:
         self.align = align
         self.color = color
 
+    def move(self, pos):
+        self.pos = pos
+
+    def update(self,text):
+        self.text = text
+
     def draw(self):
         surf = font.render(self.text,False,black)
-        rect = surf.get_rect()
+        rect = surf.get_rect(x=0,y=0)
         if self.align == ALIGN_RIGHT:
-            rect.right = 16
+            rect.right = self.pos[0]
+        rect.move_ip(self.pos[0]+rect.width,self.pos[1])
         gd = __main__.gameDisplay
         gd.blit(surf,rect)
-
 
 
 class TextBox:
@@ -396,16 +378,19 @@ class GearScreen:
         text = __main__.systime.get_weekday()
         weekday_text = font.render(text, False, black)
         gd.blit(weekday_text, (96, 96))
+        text = __main__.systime.get_date()
+        m_text = font.render(text, False, white)
+        gd.blit(m_text, (96, 48))
         if __main__.systime.get_hour() >= 12:
             if __main__.systime.get_hour() == 12:
-                text = str(__main__.systime.get_hour()) + ":" + str(__main__.systime.get_minute()) + " PM"
+                text = str(__main__.systime.get_hour()) + ":" + '{:02}'.format(__main__.systime.get_minute()) + " PM"
             else:
-                text = str(__main__.systime.get_hour() - 12) + ":" + str(__main__.systime.get_minute()) + " PM"
+                text = str(__main__.systime.get_hour() - 12) + ":" + '{:02}'.format(__main__.systime.get_minute()) + " PM"
         else:
             if __main__.systime.get_hour() == 0 or __main__.systime.get_hour() == 24:
-                text = "12:" + str(__main__.systime.get_minute()) + " AM"
+                text = "12:" + '{:02}'.format(__main__.systime.get_minute()) + " AM"
             else:
-                text = str(__main__.systime.get_hour()) + ":" + str(__main__.systime.get_minute()) + " AM"
+                text = str(__main__.systime.get_hour()) + ":" + '{:02}'.format(__main__.systime.get_minute()) + " AM"
         time_text = font.render(text, False, black)
         gd.blit(time_text, (96, 128))
         text = "Please select an%noption."
@@ -422,9 +407,15 @@ class GearScreen:
             gd.blit(self.btn_map, (32, 0))
         gd.blit(self.btn_phone, (64, 0))
         gd.blit(self.selector, (32 * self.select, 0))
-        text = __main__.systime.get_date()
-        m_text = font.render(text, False, white)
-        gd.blit(m_text, (96, 48))
+
+class MapObject:
+    def __init__(self, x, y, width, height, name, type):
+        self.x = x
+        self.y = y
+        self.width = width
+        self.height = height
+        self.name = name
+        self.type = type
 
 
 class MapScreen:
@@ -435,7 +426,11 @@ class MapScreen:
         self.map_selector = pygame.image.load(__main__.ui_dir + "map_select.png")
         self.map_selector = pygame.transform.scale(self.map_selector, (16, 16))
         map_data = load_pygame(__main__.map_dir + "map_" + str(__main__.map.region) + ".tmx")
-        self.map_objects = map_data.objects
+        self.map_objects = []
+        for obj in map_data.objects:
+            mobj = MapObject(obj.x, obj.y, obj.width, obj.height, obj.name, obj.type)
+            self.map_objects.append(mobj)
+        self.map_objects.reverse()
         self.map_img = pygame.Surface((map_data.width * 32, map_data.height * 32))
         for x in range(map_data.width):
             for y in range(map_data.height):
@@ -450,13 +445,13 @@ class MapScreen:
             if self.loc_select[1] > 0:
                 self.loc_select = (self.loc_select[0], self.loc_select[1] - 1)
         elif direction == __main__.DIR_DOWN:
-            if self.loc_select[1] < self.height:
+            if self.loc_select[1] < self.height - 1:
                 self.loc_select = (self.loc_select[0], self.loc_select[1] + 1)
         elif direction == __main__.DIR_LEFT:
             if self.loc_select[0] > 0:
                 self.loc_select = (self.loc_select[0] - 1, self.loc_select[1])
         elif direction == __main__.DIR_RIGHT:
-            if self.loc_select[0] < self.width:
+            if self.loc_select[0] < self.width - 1:
                 self.loc_select = (self.loc_select[0] + 1, self.loc_select[1])
 
     def draw(self):
@@ -466,11 +461,16 @@ class MapScreen:
         origin_y = 48
         gd.blit(self.map_img, (origin_x, origin_y))
         for obj in self.map_objects:
-            if obj.x == self.loc_select[0] and obj.y == self.loc_select[1]:
+            if math.floor(obj.x // 32) <= self.loc_select[0] and (
+                math.floor(obj.y // 32) <= self.loc_select[1]) and (
+                math.floor(obj.x // 32) + math.floor(obj.width // 32) > self.loc_select[0]) and (
+                math.floor(obj.y // 32) + math.floor(obj.height // 32) > self.loc_select[1]
+            ):
                 name_text = font.render(obj.name, False, black)
                 gd.blit(name_text, (143, 0))
-                break
-        gd.blit(self.map_selector, ((self.loc_select[0] * 32) + origin_x, (self.loc_select[1] * 32) + origin_y))
+                if obj.type == "place":
+                    break
+        gd.blit(self.map_selector, ((self.loc_select[0] * 16) + origin_x, (self.loc_select[1] * 16) + origin_y))
 
 
 class NameEntryScreen:
@@ -644,235 +644,6 @@ class NameEntryScreen:
         gd.blit(self.selector, (31 + (32 * self.select[0]), 127 + (32 * self.select[1])))
 
 
-class TrainerBattleScene:
-    def __init__(self):
-        pass
-
-
-class WildBattleScene:
-    def __init__(self, mon):
-        self.type = 'wild_battle'
-        self.stage = 0
-        self.option = dict()
-        self.option['list'] = "main"
-        self.option['index'] = 0
-        self.wild_mon = mon
-        self.wild_battler = Battler(self.wild_mon)
-        self.player = __main__.player
-        self.player_mon = self.player.data.party.get_first_able()
-        self.plyr_battler = Battler(self.player_mon)
-        self.exit = False
-        self.player_mon_img = pygame.image.load(__main__.ui_dir + '/player_mon_img.png')
-        self.battle_menu_bg = pygame.image.load(__main__.ui_dir + '/battle_menu.png')
-        self.selector = pygame.image.load(__main__.ui_dir + '/selector.png')
-
-    def move_option(self, direction):
-        if self.option['list'] == 'main' or self.option['list'] == 'moves':
-            if self.option['index'] == 0:
-                if direction == __main__.DIR_RIGHT:
-                    self.option['index'] = 1
-                elif direction == __main__.DIR_UP:
-                    self.option['index'] = 2
-                elif direction == __main__.DIR_DOWN:
-                    self.option['index'] = 2
-            elif self.option['index'] == 1:
-                if direction == __main__.DIR_LEFT:
-                    self.option['index'] = 0
-                elif direction == __main__.DIR_UP:
-                    self.option['index'] = 3
-                elif direction == __main__.DIR_DOWN:
-                    self.option['index'] = 3
-            elif self.option['index'] == 2:
-                if direction == __main__.DIR_RIGHT:
-                    self.option['index'] = 3
-                elif direction == __main__.DIR_UP:
-                    self.option['index'] = 0
-                elif direction == __main__.DIR_DOWN:
-                    self.option['index'] = 0
-            elif self.option['index'] == 3:
-                if direction == __main__.DIR_LEFT:
-                    self.option['index'] = 2
-                elif direction == __main__.DIR_UP:
-                    self.option['index'] = 1
-                elif direction == __main__.DIR_DOWN:
-                    self.option['index'] = 1
-
-    def select_option(self):
-        if self.option['list'] == 'main':
-            if self.option['index'] == 0:
-                if len(self.player_mon.moves) >= 1:
-                    self.option['list'] = 'moves'
-                    print('get moves')
-                else:
-                    self.plyr_battler.select_action('move', 'STRUGGLE')
-                    print('use struggle')
-            elif self.option['index'] == 3:
-                self.plyr_battler.select_action('flee', '')
-                print('flee')
-        elif self.option['list'] == 'moves':
-            self.plyr_battler.select_action('move',self.plyr_battler.mon.moves[self.option['index']])
-
-    def back_option(self):
-        if self.option['list'] == 'moves':
-            self.option['list'] = 'main'
-            self.option['index'] = 0
-
-    def play_turn(self):
-        while True:
-            if self.plyr_battler.action['type'] == 'flee':
-                if self.wild_battler.mon.stat['speed'] == 0:
-                    __main__.loop.run_until_complete(show_text(project.str_list['wild_battle_esc']))
-                    self.exit = True
-                    break
-                f = 256
-                if f > 255:
-                    __main__.loop.run_until_complete(show_text(project.str_list['wild_battle_esc']))
-                    self.exit = True
-                    break
-                elif self.plyr_battler.mon.stat['speed'] < self.wild_battler.mon.stat['speed']:
-                    pass
-            __main__.loop.run_until_complete(show_text())
-            break
-
-    def draw(self):
-        gd = __main__.gameDisplay
-        gd.fill(white)
-        if self.wild_mon.shiny:
-            gd.blit(self.wild_mon.species.image_front_shiny, (184, 6))
-        else:
-            gd.blit(self.wild_mon.species.image_front, (184, 6))
-        if self.stage == 0:
-            gd.blit(self.player.data.back, (16, 64))
-        if self.stage > 0:
-            if self.player_mon.shiny:
-                gd.blit(self.player_mon.species.image_back_shiny, (16, 64))
-            else:
-                gd.blit(self.player_mon.species.image_back, (16, 64))
-            gd.blit(self.player_mon_img, (143, 112))
-            origin = (143, 112)
-            player_mon_nick = font.render(self.plyr_battler.mon.nickname, False, black)
-            gd.blit(player_mon_nick, (origin[0] + 17, origin[1]))
-            player_mon_lvl = font.render(str(self.plyr_battler.mon.level), False, black)
-            gd.blit(player_mon_lvl, (origin[0] + 97, origin[1] + 16))
-            if self.plyr_battler.mon.gender == 'm':
-                text = font.render(reformat_text("{m}"), False, black)
-            elif self.plyr_battler.mon.gender == "f":
-                text = font.render(reformat_text("{m}"), False, black)
-            else:
-                text = font.render('?', False, black)
-            gd.blit(text, (origin[0] + 129, origin[1] + 14))
-            hp = (0, 0, 0)
-            pygame.draw.rect(gd,
-                             hp,
-                             (origin[0] + 50,
-                              origin[1] + 38,
-                              96 * (self.plyr_battler.mon.current_hp / self.plyr_battler.mon.stat['hp']),
-                              4))
-            text = font_right.render(str(self.plyr_battler.mon.current_hp), False, black)
-            gd.blit(text, (origin[0] + 32, origin[1] + 48))
-            text = font_right.render(str(self.plyr_battler.mon.stat['hp']), False, black)
-            gd.blit(text, (origin[0] + 98, origin[1] + 48))
-            gd.blit(self.battle_menu_bg, (0, __main__.display_height - 96))
-            if self.option['list'] == 'main':
-                if self.option['index'] == 0:
-                    gd.blit(self.selector,(0,0))
-                if self.option['index'] == 1:
-                    gd.blit(self.selector,(32,0))
-                if self.option['index'] == 2:
-                    gd.blit(self.selector,(0,32))
-                if self.option['index'] == 3:
-                    gd.blit(self.selector,(32,32))
-
-
-class Battler:
-    def __init__(self, mon):
-        self.mon = mon
-        self.action = dict()
-        self.action['type'] = ''
-        self.action['value'] = ''
-        self.stat_mod = {'hp': 0, 'atk': 0, 'def': 0, 'spa': 0, 'spd': 0, 'spe': 0}
-        self.temp_status = {"type": 'NON', "value": 0}
-        self.effect = list()
-        self.stat = self.mon.stat
-
-    def select_action(self, type, value):
-        self.action['type'] = type
-        self.action['value'] = value
-
-    def able_to_fight(self):
-        return self.mon.current_hp > 0
-
-    def change_self_stat(self, stat, amount):
-        if self.stat_mod[stat] + amount > 6:
-            self.stat_mod[stat] = 6
-        elif self.stat_mod[stat] + amount < -6:
-            self.stat_mod[stat] = -6
-        if amount > 0:
-            show_text(project.str_list['mon_raise_stat'].format(self.mon.nickname, stat.capitalize()))
-        elif amount < 0:
-            show_text(project.str_list['mon_lower_stat'].format(self.mon.nickname, stat.capitalize()))
-
-    def recalculate_stats(self):
-        self.stat = dict()
-        for key in self.mon.stat.keys():
-            if key == 'hp':
-                continue
-            if self.stat_mod[key] >= 0:
-                self.stat[key] = self.mon.stat[key] * ((2 + self.stat_mod[key]) / 2)
-            elif self.stat_mod[key] < 0:
-                self.stat[key] = self.mon.stat[key] * (2 / (2 - self.stat_mod[key]))
-
-    def has_status(self, status):
-        return status in self.effect
-
-
-class AI:
-    def __init__(self, value, trainer, battler, items=list()):
-        self.value = value
-        self.items = items
-        self.trainer = trainer
-        self.battler = battler
-
-    def calculate_next_move(self):
-        # Am I a wild mon?
-        if self.value == 0:
-            self.battler.select_action('moves', self.battler.mon.moves[math.floor(random.randrange(0,4))])
-        else:
-            # Do I have other mons I can switch to?
-            if len(self.trainer.party) > 1:
-                # Can I switch to a different mon?
-                if 'TRAP' not in self.battler.temp_status:
-                    pass
-                else:
-                    print("I can't switch out!")
-            # Is my mon at low health?
-            if self.battler.mon.current_hp < (self.battler.mon.stat['hp'] * 0.4):
-                print("My mon is low on health!")
-                item_to_use = ""
-                # Do I have a healing item available?
-                for item in self.items:
-                    if item.effect == "HEALHP" or item.effect == "HEALHP%" or item.effect == "HEALALL":
-                        self.battler.select_action('item', self.items[self.items.index(item)])
-                        item_to_use = self.items[self.items.index(item)]
-                if item_to_use != "":
-                    return
-            move_damages = []
-            # Check all my moves and see which one will do the most damage.
-            for move in self.battler.mon.moves:
-                if move.pp != 0:
-                    move_damages.append(calculate_damage(self.battler, self.battler, move))
-                else:
-                    move_damages.append(-1)
-            m = 0
-            for move in self.battler.mon.moves:
-                if self.battler.mon.moves.index(move) == 0:
-                    continue
-                if move_damages[self.battler.mon.moves.index(move)] > move_damages[m]:
-                    m = self.battler.mon.moves.index(move)
-            self.battler.select_action('moves', self.battler.mon.moves[m])
-
-
-
 class Item:
     def __init__(self, name, desc, type, price, scope, effect):
         self.name = name
@@ -884,11 +655,12 @@ class Item:
 
 
 class MonSpecies:
-    def __init__(self, species_id, name, base_stats, learnset={}, evolutions=[], gender_ratio="GENDERLESS",
+    def __init__(self, species_id, name, base_stats, type=list("???"), learnset={}, evolutions=[], gender_ratio="GENDERLESS",
                  catchrate=45):
         self.id = species_id
         self.name = name
         self.base_stat = base_stats
+        self.type = type
         self.learnset = LearnSet(learnset)
         self.evolution = evolutions
         self.gender_ratio = gender_ratio
@@ -1059,6 +831,29 @@ class Party:
 
     def __len__(self):
         return len(self.mons)
+
+
+class PCMenu:
+    def __init__(self):
+        pass
+
+
+class PCBoxSystem:
+    def __init__(self):
+        self.box = []
+        for x in range(30):
+            self.box = PCBox()
+
+
+class PCBox:
+    def __init__(self):
+        self.content = []
+        for x in range(30):
+            self.content.append(None)
+
+    def get_pokemon(self, column, row):
+        spot = (row * 6) + column
+        return self.content[spot]
 
 
 class Bag:
@@ -1399,7 +1194,7 @@ def open_menu():
                         getout = True
                     else:
                         menu.select_option()
-        if getout == True:
+        if getout:
             break
         __main__.draw_all()
         __main__.clock.tick(__main__.fps)
@@ -1435,7 +1230,7 @@ def call_bag_screen():
                     else:
                         bag_screen.select_option()
                         getout = True
-        if getout == True:
+        if getout:
             break
         __main__.draw_all()
         __main__.clock.tick(__main__.fps)
@@ -1467,14 +1262,40 @@ def call_pokegear_screen():
                 if event.key == pygame.K_LEFT:
                     gear_screen.move_select(-1)
                 if event.key == pygame.K_c:
-                    pass
-        if getout == True:
+                    if gear_screen.scene is not None:
+                        if gear_screen.scene.type == 'map_screen':
+                            call_into_map_screen(gear_screen.scene)
+        if getout:
             break
         __main__.draw_all()
         __main__.clock.tick(__main__.fps)
     __main__.loop.run_until_complete(__main__.screen_blink(0.5))
     __main__.ui_elements.remove(gear_screen)
     del gear_screen
+
+
+def call_into_map_screen(map_scene):
+    pygame.event.clear()
+    getout = False
+    while not getout:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                quit()
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_x:
+                    getout = True
+                if event.key == pygame.K_DOWN:
+                    map_scene.move_select(__main__.DIR_DOWN)
+                if event.key == pygame.K_UP:
+                    map_scene.move_select(__main__.DIR_UP)
+                if event.key == pygame.K_RIGHT:
+                    map_scene.move_select(__main__.DIR_RIGHT)
+                if event.key == pygame.K_LEFT:
+                    map_scene.move_select(__main__.DIR_LEFT)
+        __main__.draw_all()
+        __main__.clock.tick(__main__.fps)
+
 
 
 def call_name_entry_screen():
@@ -1541,61 +1362,43 @@ def load_game_async(file_path):
         obj = pickle.loads(m)
         return obj
 
+import battle
 
 def start_wild_battle(mon, level, shiny=False, fateful=False):
     wild_mon = Mon(mon, level, shiny=shiny)
-    battle = WildBattleScene(wild_mon)
+    battle_s = battle.WildBattleScene(wild_mon)
     __main__.loop.run_until_complete(__main__.screen_blink(0.5))
-    __main__.ui_elements.append(battle)
+    __main__.ui_elements.append(battle_s)
     show_text(project.str_list['wild_battle_begin'].format(wild_mon.nickname))
-    show_text(project.str_list['plyr_battle_send_out'].format(battle.plyr_battler.mon.nickname))
-    battle.stage = 1
+    show_text(project.str_list['plyr_battle_send_out'].format(battle_s.plyr_battler.mon.nickname))
+    battle_s.stage = 1
     pygame.event.clear()
-    while not battle.exit:
-        while battle.plyr_battler.action['type'] == None and battle.plyr_battler.action['value'] == None:
+    while not battle_s.exit:
+        while battle_s.plyr_battler.action['type'] == '' and battle_s.plyr_battler.action['value'] == '':
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     pygame.quit()
                     quit()
                 if event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_c:
-                        battle.select_option()
+                        battle_s.select_option()
                     if event.key == pygame.K_x:
-                        battle.back_option()
+                        battle_s.back_option()
                     if event.key == pygame.K_DOWN:
-                        battle.move_option(__main__.DIR_DOWN)
+                        battle_s.move_option(__main__.DIR_DOWN)
                     if event.key == pygame.K_UP:
-                        battle.move_option(__main__.DIR_UP)
+                        battle_s.move_option(__main__.DIR_UP)
                     if event.key == pygame.K_RIGHT:
-                        battle.move_option(__main__.DIR_RIGHT)
+                        battle_s.move_option(__main__.DIR_RIGHT)
                     if event.key == pygame.K_LEFT:
-                        battle.move_option(__main__.DIR_LEFT)
-                if battle.exit:
+                        battle_s.move_option(__main__.DIR_LEFT)
+                if battle_s.exit:
                     break
                 __main__.draw_all()
                 __main__.clock.tick(__main__.fps)
-        battle.play_turn()
+        battle_s.play_turn()
         __main__.draw_all()
         __main__.clock.tick(__main__.fps)
     loop.run_until_complete(__main__.screen_blink(0.5))
-    __main__.ui_elements.remove(battle)
-    del battle
-
-
-def calculate_damage(battler_a: Battler, battler_b: Battler, move):
-    other = 1
-    if battler_a.mon.status == "burn":
-        other = 0.5
-    stab = 1
-    if battler_a.mon.type == move.type:
-        stab = 1.5
-    type_eff = 1
-    mod = stab * type_eff * other
-    if move.get_category() == 'PHYSICAL':
-        damage = ((2 * battler_a.mon.level + 10) / 250) * (battler_a.stat['atk'] / battler_b.stat['def']
-                                                           ) * move.power * mod
-    else:
-        damage = ((2 * battler_a.mon.level + 10) / 250) * (battler_a.stat['spa'] / battler_b.stat['spd']
-                                                           ) * move.power * mod
-    print("Calculated damage of", damage)
-    return damage
+    __main__.ui_elements.remove(battle_s)
+    del battle_s

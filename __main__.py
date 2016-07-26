@@ -1,17 +1,11 @@
-music_dir = 'Music/'
-me_dir = 'ME/'
-sound_dir = 'Sounds/'
-map_dir = 'Maps/'
-spr_dir = 'Sprites/'
-ui_dir = 'UI/'
-script_dir = 'EventScripts/'
-
+from const import *
 import random
 import pickle
 import io
 import gc
 import os
 import sys
+import math
 import pygame
 import pygame.midi
 from pytmx.util_pygame import load_pygame
@@ -49,22 +43,6 @@ import project
 game_title = 'Pymon Crystal'
 # game_icon = pygame.image.load('icon.png')
 
-red = (255, 0, 0)
-blue = (0, 0, 255)
-green = (0, 255, 0)
-yellow = (255, 255, 0)
-white = (255, 255, 255)
-black = (0, 0, 0)
-
-display_width = 320
-display_height = 288
-
-resolution_factor = 2
-
-block_size = 32
-
-fps = 30
-
 KEY_A = False
 KEY_A_DOWN = False
 KEY_B = False
@@ -74,11 +52,6 @@ KEY_DOWN = False
 KEY_LEFT = False
 KEY_RIGHT = False
 KEY_CODE = False
-
-DIR_LEFT = 0
-DIR_RIGHT = 1
-DIR_UP = 2
-DIR_DOWN = 3
 
 map = None
 
@@ -120,11 +93,72 @@ class SystemTime:
             return "Night"
 
     def get_date(self) -> str:
-        return str(datetime.datetime.now().month) + '/' + str(datetime.datetime.now().day) + '/' + str(
+        return str(datetime.datetime.now().month) + '/' + '{:02}'.format(datetime.datetime.now().day) + '/' + str(
             datetime.datetime.now().year)
 
 
 systime = SystemTime()
+storage = engine.PCBoxSystem()
+
+
+class PlayTime:
+    def __init__(self, time=0):
+        self.time = time
+        self.count()
+
+    @asyncio.coroutine
+    def count(self):
+        while True:
+            yield from asyncio.sleep(1)
+            self.time += 1
+
+    def get_hours(self):
+        return self.time // 3600
+
+    def render(self):
+        hours = self.get_hours()
+        h = str(hours)
+        minutes = (self.time - (hours * 3600)) // 60
+        m = str(minutes)
+        seconds = (self.time - (hours * 3600) - (minutes * 60))
+        s = str(seconds)
+        return h + ':' + '{:2}'.format(m) + ':' + '{:2}'.format(s)
+
+class Screen:
+    def __init__(self):
+        self.x = 0
+        self.y = 0
+
+    @asyncio.coroutine
+    def shake(self, intensity_x = 1, intensity_y = 1, duration = 4, loss = 0.8):
+        i_fx = intensity_x
+        i_fy = intensity_y
+        for x in range(duration):
+            self.x = i_fx
+            self.y = i_fy
+            draw_all()
+            clock.tick(fps)
+            yield from asyncio.sleep(0.05)
+            self.x = 0
+            self.y = 0
+            draw_all()
+            clock.tick(fps)
+            yield from asyncio.sleep(0.05)
+            self.x = -i_fx
+            self.y = -i_fy
+            draw_all()
+            clock.tick(fps)
+            yield from asyncio.sleep(0.05)
+            self.x = 0
+            self.y = 0
+            draw_all()
+            clock.tick(fps)
+            yield from asyncio.sleep(0.05)
+            i_fx *= loss
+            i_fy *= loss
+            if i_fx <= 0 and i_fy <= 0:
+                break
+
 
 
 class Map:
@@ -237,6 +271,15 @@ class Map:
                 else:
                     trigger = None
                 self.obj_list.append(trigger)
+            elif obj.type == "playerstart":
+                player_start = PlayerStart(obj.x,obj.y)
+                self.obj_list.append(player_start)
+            elif obj.type == "autoscript":
+                if 'flag' in obj.properties:
+                    autoscript = AutoScript(obj.properties['script'],obj.properties['flag'],obj.properties)
+                else:
+                    autoscript = AutoScript(obj.properties['script'], 0, obj.properties)
+                self.obj_list.append(autoscript)
 
     def load_map_border(self):
         self.tile_border_img = pygame.Surface((64,64))
@@ -356,11 +399,29 @@ class GameData:
         self.map_flags = dict()
         self.map_vars = dict()
 
+    def check_map_flag(self, flag):
+        if self.map_flags[map.name][flag]:
+            return True
+        return False
+
+    def get_map_var(self, var):
+        return self.map_vars[map.name][var]
+
+    def set_map_var(self, var, value):
+        self.map_vars[map.name][var] = value
+
+    def activate_map_flag(self, flag):
+        self.map_flags[map.name][flag] = True
+
+    def reset_map_flag(self, flag):
+        self.map_flags[map.name][flag] = False
+
 
 class SaveData:
     def __init__(self):
         self.player = player.data
         self.game = gameData
+        self.pc = storage
 
     def sync(self):
         self.player = player.data
@@ -444,6 +505,10 @@ class Player:
         self.layer = 0
         self.x = block_size * 10
         self.y = block_size * 8
+        for obj in map.obj_list:
+            if obj.type == 'playerstart':
+                self.x = math.floor(obj.x)
+                self.y = math.floor(obj.y)
         if self.data.on_bike:
             self.move_speed = 8
         else:
@@ -598,11 +663,11 @@ class Player:
                 if KEY_A_DOWN:
                     if self.dir == DIR_UP and not self.isBusy:
                         if get_tile_terrain(self.x, self.y - block_size) == "water" and not player.data.surfing:
-                            show_text(project.str_list['surf_ask'],True)
+                            engine.show_text(project.str_list['surf_ask'],True)
                             result = engine.yes_no_box()
                             engine.clear_ui('text_box')
                             if result:
-                                show_text(project.str_list['surf_use'].format(player.data.name),False)
+                                engine.show_text(project.str_list['surf_use'].format(player.data.name),False)
                                 self.dest_y -= block_size
                                 self.data.surfing = True
                                 self.data.on_bike = False
@@ -620,11 +685,11 @@ class Player:
                                         obj.interact()
                     elif self.dir == DIR_DOWN and not self.isBusy:
                         if get_tile_terrain(self.x, self.y + block_size) == "water" and not player.data.surfing:
-                            show_text(project.str_list['surf_ask'],True)
+                            engine.show_text(project.str_list['surf_ask'],True)
                             result = engine.yes_no_box()
                             engine.clear_ui('text_box')
                             if result:
-                                show_text(project.str_list['surf_use'].format(player.data.name),False)
+                                engine.show_text(project.str_list['surf_use'].format(player.data.name),False)
                                 self.dest_y += block_size
                                 self.data.surfing = True
                                 self.data.on_bike = False
@@ -636,11 +701,11 @@ class Player:
                                     obj.interact()
                     elif self.dir == DIR_LEFT and not self.isBusy:
                         if get_tile_terrain(self.x - block_size, self.y) == "water" and not player.data.surfing:
-                            show_text(project.str_list['surf_ask'],True)
+                            engine.show_text(project.str_list['surf_ask'],True)
                             result = engine.yes_no_box()
                             engine.clear_ui('text_box')
                             if result:
-                                show_text(project.str_list['surf_use'].format(player.data.name),False)
+                                engine.show_text(project.str_list['surf_use'].format(player.data.name),False)
                                 self.dest_x -= block_size
                                 self.data.surfing = True
                                 self.data.on_bike = False
@@ -652,11 +717,11 @@ class Player:
                                     obj.interact()
                     elif self.dir == DIR_RIGHT and not self.isBusy:
                         if get_tile_terrain(self.x + block_size, self.y) == "water" and not player.data.surfing:
-                            show_text(project.str_list['surf_ask'],True)
+                            engine.show_text(project.str_list['surf_ask'],True)
                             result = engine.yes_no_box()
                             engine.clear_ui('text_box')
                             if result:
-                                show_text(project.str_list['surf_use'].format(player.data.name),False)
+                                engine.show_text(project.str_list['surf_use'].format(player.data.name),False)
                                 self.dest_x += block_size
                                 self.data.surfing = True
                                 self.data.on_bike = False
@@ -918,7 +983,7 @@ class Signpost:
         global inEvent
         inEvent = True
         print('start event')
-        loop.run_until_complete(engine.show_text(self.text))
+        engine.show_text(self.text)
         print('event is done')
         player.isBusy = False
         inEvent = False
@@ -966,7 +1031,7 @@ class BerryTree:
     def interact(self):
         global inEvent
         inEvent = True
-        loop.run_until_complete(engine.show_text(project.str_list['berry_tree']))
+        engine.show_text(project.str_list['berry_tree'])
         player.isBusy = False
         inEvent = False
 
@@ -975,6 +1040,55 @@ class BerryTree:
 
     def draw(self):
         pass
+
+
+class PlayerStart:
+    def __init__(self, x, y):
+        self.x = x
+        self.y = y
+        self.type = "playerstart"
+
+    def interact(self):
+        pass
+
+    def update(self):
+        del self
+
+    def draw(self):
+        pass
+
+
+class AutoScript:
+    def __init__(self, script, flag, properties):
+        self.type = "autoscript"
+        if not check_flag(flag):
+            self.behavior = import_file(script_dir + script)
+            self.behavior.__init__(properties)
+            self.behavior.run()
+            activate_flag(flag)
+        del self
+
+
+def check_flag(flag):
+    if gameData.flags[flag]:
+        return True
+    return False
+
+
+def get_var(var):
+    return gameData.vars[var]
+
+
+def set_var(var, value):
+    gameData.vars[var] = value
+
+
+def activate_flag(flag):
+    gameData.flags[flag] = True
+
+
+def reset_flag(flag):
+    gameData.flags[flag] = False
 
 
 def on_enter_tile(x, y):
@@ -1197,7 +1311,6 @@ def load_map(name):
     if 'outside' in dmap.properties:
         if dmap.properties['outside'] == "true":
             if systime.get_time_of_day() == "Night":
-                print("It's night.")
                 dmap.tilesets[0].source = "../Tilesets/GSC overworld johto nite.png"
                 dmap.reload_images()
     map = Map(dmap)
@@ -1225,11 +1338,11 @@ def draw_all():
     for element in ui_elements:
         element.draw()
     cover.draw()
-    winDisplay.blit(pygame.transform.scale(gameDisplay,(display_width * resolution_factor, display_height * resolution_factor),winDisplay),(0,0))
+    winDisplay.blit(pygame.transform.scale(gameDisplay,(display_width * resolution_factor, display_height * resolution_factor),winDisplay),(screen.x,screen.y))
     pygame.display.update([0,0,display_width * resolution_factor,display_height * resolution_factor])
 
 
-def show_text(string,keep_open = False):
+def show_text(string,keep_open=False):
     loop.run_until_complete(engine.show_text(string,keep_open))
 
 
@@ -1240,6 +1353,7 @@ pygame.display.update()
 pygame.display.set_caption(game_title)
 inEvent = False
 cam = Camera()
+screen = Screen()
 obj_list = []
 ui_elements = []
 inMenu = False
@@ -1249,8 +1363,11 @@ gameData = GameData()
 load_map('test')
 player = Player()
 save = SaveData()
+# import error
+# error.call_error_screen("Cannot find file:%n'saveio.py'")
+import title
+title.call_title_sequence()
 # pygame.display.set_icon(game_icon)
-print('Initializing game components...')
 exit_game = False
 if __name__ == '__main__':
     print('Entering main loop...')
