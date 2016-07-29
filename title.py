@@ -1,5 +1,6 @@
 from const import *
-from __main__ import loop, screen_blink, gameDisplay, winDisplay, clock
+from __main__ import musicsys, loop, screen_blink, gameDisplay, winDisplay, clock
+from engine import Text
 import pygame
 
 
@@ -26,6 +27,7 @@ class AnimatedTitle:
 
 
 def call_title_sequence():
+    print('Start title screen')
     title_screen = AnimatedTitle()
     exit = False
     while not exit:
@@ -38,6 +40,10 @@ def call_title_sequence():
                     loop.run_until_complete(screen_blink(0.5))
                     exit = True
         title_screen.draw()
+        version_string = 'v' + str(build_version[0]) + '.' + str(build_version[1]) + '.' + str(build_version[2])
+        text = Text(text=version_string, pos=(0, 0), color=white)
+        text.draw()
+        musicsys.update()
         winDisplay.blit(pygame.transform.scale(
             gameDisplay, (
                 display_width * resolution_factor,

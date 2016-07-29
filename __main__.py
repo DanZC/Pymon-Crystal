@@ -3,6 +3,7 @@ import random
 import pickle
 import io
 import gc
+import json
 import os
 import sys
 import math
@@ -30,8 +31,9 @@ loop = asyncio.get_event_loop()
 
 
 pygame.init()
-pygame.mixer.init(frequency=22050, size=-16, channels=4, buffer=40960)
+pygame.mixer.init(frequency=44100, size=-16, channels=4, buffer=40960)
 music = pygame.mixer.music
+music.set_volume(0.5)
 pygame.font.init()
 Time = pygame.time
 clock = pygame.time.Clock()
@@ -41,7 +43,7 @@ import engine
 import project
 
 game_title = 'Pymon Crystal'
-# game_icon = pygame.image.load('icon.png')
+game_icon = pygame.image.load('icon.png')
 
 KEY_A = False
 KEY_A_DOWN = False
@@ -58,6 +60,90 @@ map = None
 song = None
 
 print('Setting up...')
+
+
+class Song:
+    def __init__(self, name, file_ext = ".ogg"):
+        music.load(music_dir + name + file_ext)
+        try:
+            with open(music_dir + name + ".json") as json_data:
+                data = json.load(json_data)
+        except:
+            data = {"start":0, "loop_start":0, "loop_end":10000000000}
+        finally:
+            self.start = data['start']
+            self.loop_start = data['loop_start']
+            self.loop_end = data['loop_end']
+            del data
+
+
+class MusicSystem:
+    def __init__(self):
+        self.song = Song('test')
+        self.pos = self.song.start
+        self.queue = 'test'
+        self.clock = pygame.time.Clock()
+        self.paused = False
+        music.stop()
+        self.title = 'test'
+        self.queue = []
+        #self.ext = '.ogg'
+        self.change_track = False
+
+    def load_song(self, name, file_ext = ".ogg"):
+        self.title = name
+        self.song = Song(name, file_ext)
+
+    def load_queue(self):
+        if len(self.queue) > 0:
+            new_song = self.queue.pop(0)
+            self.load_song(new_song['name'],new_song['ext'])
+            self.play()
+
+    def clear_queue(self):
+        self.queue = []
+
+    def play(self):
+        music.play(-1, 0)
+
+    def pause(self):
+        music.pause()
+        self.paused = True
+
+    def unpause(self):
+        music.unpause()
+        self.paused = False
+
+    def fadeout(self, time):
+        music.fadeout(time)
+
+    def enqueue(self, name, file_ext= ".ogg"):
+        dict_s = {"name":name, "ext":file_ext}
+        self.queue.append(dict_s)
+
+    def fade_to(self, name, time, ext='.ogg'):
+        self.fadeout(time)
+        self.title = name
+        self.ext = ext
+        self.enqueue(name, ext)
+
+    def swap(self, name, ext = '.ogg'):
+        music.stop()
+        self.clear_queue()
+        self.title = name
+        self.song = Song(name, ext)
+        self.play()
+
+    def update(self):
+        if not self.paused:
+            if music.get_busy():
+                self.pos += self.clock.tick()
+                if self.pos >= self.song.loop_end:
+                    music.set_pos(self.song.loop_start)
+            else:
+                self.load_queue()
+        else:
+            s = self.clock.tick()
 
 
 class SystemTime:
@@ -97,6 +183,7 @@ class SystemTime:
             datetime.datetime.now().year)
 
 
+musicsys = MusicSystem()
 systime = SystemTime()
 storage = engine.PCBoxSystem()
 
@@ -210,16 +297,11 @@ class Map:
         self.load_map_connections()
         self.load_map_border()
         global song
-#        if 'music' in map_.properties:
-#            if song is None:
-#                music.load(music_dir + map_.properties['music'])
-#                music.play(-1,0)
-#                song = map_.properties['music']
-#            if map_.properties['music'] != song:
-#                music.fadeout(1)
-#                music.load(music_dir + map_.properties['music'])
-#                music.play(-1,0)
-#                song = map_.properties['music']
+        if 'music' in map_.properties:
+            if musicsys.title == 'test':
+                musicsys.load_song(map_.properties['music'])
+            elif map_.properties['music'] != musicsys.title:
+                musicsys.fade_to(map_.properties['music'], 1)
 
     def load_tile_data(self):
         for y in range(self.map.height):
@@ -274,12 +356,12 @@ class Map:
             elif obj.type == "playerstart":
                 player_start = PlayerStart(obj.x,obj.y)
                 self.obj_list.append(player_start)
-            elif obj.type == "autoscript":
+            elif obj.type == "auto_trigger":
                 if 'flag' in obj.properties:
-                    autoscript = AutoScript(obj.properties['script'],obj.properties['flag'],obj.properties)
+                    auto_trigger = AutoTrigger(obj.properties['script'],obj.properties['flag'],obj.properties)
                 else:
-                    autoscript = AutoScript(obj.properties['script'], 0, obj.properties)
-                self.obj_list.append(autoscript)
+                    auto_trigger = AutoTrigger(obj.properties['script'], 0, obj.properties)
+                self.obj_list.append(auto_trigger)
 
     def load_map_border(self):
         self.tile_border_img = pygame.Surface((64,64))
@@ -1058,9 +1140,9 @@ class PlayerStart:
         pass
 
 
-class AutoScript:
+class AutoTrigger:
     def __init__(self, script, flag, properties):
-        self.type = "autoscript"
+        self.type = "auto_trigger"
         if not check_flag(flag):
             self.behavior = import_file(script_dir + script)
             self.behavior.__init__(properties)
@@ -1323,6 +1405,7 @@ def unload_map():
 
 
 def draw_all():
+    musicsys.update()
     if cam.center_on_player:
         cam.realign()
     cam.draw()
@@ -1348,9 +1431,35 @@ def show_text(string,keep_open=False):
 
 print('Open game window...')
 gameDisplay = pygame.Surface((display_width, display_height))
+pygame.display.set_caption(game_title, 'taskbar_icon.png')
+pygame.display.set_icon(game_icon)
 winDisplay = pygame.display.set_mode((display_width * resolution_factor, display_height * resolution_factor))
+boot = pygame.image.load(ui_dir + "boot.png")
+gameDisplay.blit(boot,(0,0))
 pygame.display.update()
-pygame.display.set_caption(game_title)
+boot_tick = 0
+while boot_tick < 100:
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            pygame.quit()
+            quit()
+    if boot_tick > 10 and boot_tick < 50:
+        gameDisplay.blit(boot, (0, 0))
+    else:
+        gameDisplay.fill((0,0,0))
+    winDisplay.blit(pygame.transform.scale(
+        gameDisplay, (
+            display_width * resolution_factor,
+            display_height * resolution_factor
+        ), winDisplay), (0, 0))
+    pygame.display.update([
+        0, 0,
+        display_width * resolution_factor, display_height * resolution_factor
+    ])
+    clock.tick(30)
+    boot_tick += 1
+del boot
+del boot_tick
 inEvent = False
 cam = Camera()
 screen = Screen()
@@ -1363,10 +1472,14 @@ gameData = GameData()
 load_map('test')
 player = Player()
 save = SaveData()
-# import error
-# error.call_error_screen("Cannot find file:%n'saveio.py'")
 import title
+musicsys.load_song('PkmGS-Title')
 title.call_title_sequence()
+load_map('test')
+del player
+player = Player()
+import error
+# error.call_error_screen("Could not connect%nto internet...%nPlease try%nagain... (0x3C)")
 # pygame.display.set_icon(game_icon)
 exit_game = False
 if __name__ == '__main__':

@@ -57,7 +57,7 @@ class Text:
         self.text = text
 
     def draw(self):
-        surf = font.render(self.text,False,black)
+        surf = font.render(self.text,False,self.color)
         rect = surf.get_rect(x=0,y=0)
         if self.align == ALIGN_RIGHT:
             rect.right = self.pos[0]

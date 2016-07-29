@@ -6,7 +6,7 @@
   <property name="encounter" value="test"/>
   <property name="map_flag_amount" type="int" value="1"/>
   <property name="map_var_amount" type="int" value="0"/>
-  <property name="music" value="test.mid"/>
+  <property name="music" value="PkmGS-Cherrygrove"/>
   <property name="outside" type="bool" value="true"/>
   <property name="region_number" type="int" value="0"/>
   <property name="region_size" value="1"/>

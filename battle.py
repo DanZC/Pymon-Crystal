@@ -176,7 +176,7 @@ class WildBattleScene:
             gd.blit(self.battle_menu_bg, (0, __main__.display_height - 96))
             if self.option['list'] == 'main':
                 if self.option['index'] == 0:
-                    gd.blit(self.selector,(0,0))
+                    gd.blit(self.selector, (0, 0))
                 if self.option['index'] == 1:
                     gd.blit(self.selector,(32,0))
                 if self.option['index'] == 2:

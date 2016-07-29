@@ -9,6 +9,7 @@ added_files = [
 	 ( './Sprites', 'Sprites' ),
 	 ( './Tilesets', 'Tilesets' ),
 	 ( './Battlers', 'Battlers' ),
+	 ( './Encounters', 'Encounters' ),
 	 ( './EventScripts', 'EventScripts' ),
 	 ( './Player', 'Player' ),
 	 ( './Music', 'Music' ),
@@ -17,10 +18,10 @@ added_files = [
          ]
 
 a = Analysis(['__main__.py'],
-             pathex=['C:\\Users\\Matt\\Desktop\\PyGame'],
+             pathex=['D:\\Projects\\PyGame'],
              binaries=None,
              datas=added_files,
-             hiddenimports=[],
+             hiddenimports=['title.py'],
              hookspath=[],
              runtime_hooks=[],
              excludes=[],

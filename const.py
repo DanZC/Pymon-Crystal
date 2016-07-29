@@ -1,3 +1,5 @@
+build_version = [0, 0, 2]
+
 red = (255, 0, 0)
 blue = (0, 0, 255)
 green = (0, 255, 0)

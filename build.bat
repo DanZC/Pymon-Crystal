@@ -1,8 +1,8 @@
 pyinstaller ^
 --noconfirm ^
---log-level=WARN ^
+--log-level=INFO ^
 --onefile ^
 --console ^
 -n "Pymon" ^
+--icon=taskbar_icon.ico ^
 Pymon.spec
-python cleanup.py
