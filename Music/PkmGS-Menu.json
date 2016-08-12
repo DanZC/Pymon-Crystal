@@ -1,3 +1,5 @@
 {
-  "intro":"PkmGS-Menu_intro.ogg"
+  "start":0,
+  "loop_start":9.010,
+  "loop_end":17.008
 }

@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<objecttypes>
+ <objecttype name="NPC" color="#ffff00"/>
+ <objecttype name="door" color="#aaaa00">
+  <property name="dest_map" type="string" default="this"/>
+  <property name="dest_x" type="float"/>
+  <property name="dest_y" type="float"/>
+  <property name="warp_type" type="string" default="enter"/>
+ </objecttype>
+ <objecttype name="trigger" color="#e200ff">
+  <property name="behavior" type="string"/>
+  <property name="flag" type="int"/>
+ </objecttype>
+ <objecttype name="signpost" color="#555555">
+  <property name="text" type="string"/>
+ </objecttype>
+ <objecttype name="playerstart" color="#aa0000"/>
+ <objecttype name="town" color="#ee690a"/>
+ <objecttype name="route" color="#e8f880"/>
+ <objecttype name="place" color="#de4a34"/>
+ <objecttype name="autotrigger" color="#0000ff">
+  <property name="behavior" type="string"/>
+  <property name="flag" type="int"/>
+ </objecttype>
+ <objecttype name="item" color="#ff0000">
+  <property name="amount" type="int" default="1"/>
+  <property name="hidden" type="bool"/>
+  <property name="item" type="string"/>
+ </objecttype>
+ <objecttype name="tree" color="#00aa00"/>
+</objecttypes>

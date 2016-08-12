@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <map version="1.0" orientation="orthogonal" renderorder="right-down" width="9" height="8" tilewidth="32" tileheight="32" backgroundcolor="#383838" nextobjectid="11">
  <properties>
-  <property name="music" value="test.mid"/>
+  <property name="music" value="PkmGS-Cherrygrove"/>
   <property name="outside" type="bool" value="false"/>
  </properties>
  <tileset firstgid="1" source="../Tilesets/GSC indoor b.tsx"/>
@@ -39,7 +39,7 @@
    </properties>
   </object>
  </objectgroup>
- <layer name="Border" width="2" height="2">
+ <layer name="Border" width="2" height="2" offsetx="-64" offsety="-64">
   <data encoding="csv">
 33,33,
 33,33

@@ -137,9 +137,11 @@ class MusicSystem:
     def update(self):
         if not self.paused:
             if music.get_busy():
-                self.pos += self.clock.tick()
+                s = self.clock.tick()
+                self.pos += (s / 1000)
                 if self.pos >= self.song.loop_end:
                     music.set_pos(self.song.loop_start)
+                    self.pos = self.song.loop_start
             else:
                 self.load_queue()
         else:
@@ -298,7 +300,9 @@ class Map:
         self.load_map_border()
         global song
         if 'music' in map_.properties:
-            if musicsys.title == 'test':
+            if musicsys.title == 'null':
+                pass
+            elif musicsys.title == 'test':
                 musicsys.load_song(map_.properties['music'])
             elif map_.properties['music'] != musicsys.title:
                 musicsys.fade_to(map_.properties['music'], 1)

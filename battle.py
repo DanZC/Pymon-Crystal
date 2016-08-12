@@ -82,6 +82,25 @@ class WildBattleScene:
             self.option['list'] = 'main'
             self.option['index'] = 0
 
+    def attack_turn(self, battler_a, move_a, battler_t):
+        if confusion_check(self.plyr_battler
+                           ) and love_check(self.plyr_battler
+                                            ) and paralyze_check(self.plyr_battler):
+
+            show_text(project.str_list['mon_use_move'].format(battler_a.mon.nickname, move_a.name), False)
+            # If the move connects
+            if random.randint(0, 100) <= move_a.accuracy:
+                if move_a.effect['type'] == "SINGLE_HIT":
+                    dmg = calculate_damage(battler_a, battler_t, move_a)
+                    battler_t.apply_damage(dmg)
+                    if battler_t.mon.current_hp <= 0:
+                        battler_t.faint()
+                return True
+            # If the move misses
+            else:
+                show_text(project.str_list['mon_miss'].format(self.plyr_battler.mon.nickname), False)
+                return False
+
     def play_turn(self):
         print('play turn')
         while True:
@@ -107,24 +126,15 @@ class WildBattleScene:
                 plyr = self.plyr_battler
                 wild = self.wild_battler
                 move_plyr = project.move_list[plyr.action['value']]
-                #move_wild = wild.mon.moves[int(wild.action['value'])]
+                move_wild = wild.mon.moves[int(wild.action['value'])]
                 if self.plyr_battler.stat['spe'] > self.wild_battler.stat['spe']:
-                    if confusion_check(self.plyr_battler
-                                       ) and love_check(self.plyr_battler
-                                                        ) and paralyze_check(self.plyr_battler):
-                        show_text(project.str_list['mon_use_move'].format(self.plyr_battler.mon.nickname,move_plyr.name),False)
-                        # If the move connects
-                        if random.randint(0,100) <= move_plyr.accuracy:
-                            if move_plyr.effect['type'] == "SINGLE_HIT":
-                                dmg = calculate_damage(plyr,wild,move_plyr)
-                                wild.apply_damage(dmg)
-                                if wild.mon.current_hp <= 0:
-                                    wild.faint()
-                        # If the move misses
-                        else:
-                            show_text(project.str_list['mon_miss'].format(self.plyr_battler.mon.nickname),False)
-            elif self.plyr_battler.stat['spe'] < self.wild_battler.stat['spe']:
-                print('slower')
+                    self.attack_turn(plyr, move_plyr, wild)
+                    if self.wild_battler.able_to_fight():
+                        self.attack_turn(wild, move_wild, plyr)
+                elif self.plyr_battler.stat['spe'] < self.wild_battler.stat['spe']:
+                    self.attack_turn(wild, move_wild, plyr)
+                    if self.plyr_battler.able_to_fight():
+                        self.attack_turn(plyr, move_plyr, wild)
             break
         self.plyr_battler.action['type'] = ''
         self.plyr_battler.action['value'] = ''
