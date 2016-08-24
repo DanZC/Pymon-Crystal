@@ -12,7 +12,7 @@
     "catch_rate":0
   },
   {"name": "BULBASAUR", "type":["GRASS","POISON"],
-    "stats": {"hp": 100, "atk": 100, "def": 100, "spa": 100, "spd": 100, "spe": 100},
+    "stats": {"hp": 45, "atk": 49, "def": 49, "spa": 65, "spd": 65, "spe": 45},
     "learnset":
     [{
       "1":["SCRATCH","CUT"],
@@ -25,7 +25,7 @@
     "catch_rate":45
   },
   {"name": "IVYSAUR", "type":["GRASS","POISON"],
-    "stats": {"hp": 100, "atk": 100, "def": 100, "spa": 100, "spd": 100, "spe": 100},
+    "stats": {"hp": 60, "atk": 62, "def": 63, "spa": 80, "spd": 80, "spe": 60},
     "learnset":
     [{
       "1":["SCRATCH","CUT"],
@@ -38,7 +38,7 @@
     "catch_rate":45
   },
   {"name": "VENUSAUR", "type":["GRASS","POISON"],
-    "stats": {"hp": 100, "atk": 100, "def": 100, "spa": 100, "spd": 100, "spe": 100},
+    "stats": {"hp": 80, "atk": 82, "def": 83, "spa": 100, "spd": 100, "spe": 80},
     "learnset":
     [{
       "1":["SCRATCH","CUT"],
@@ -54,10 +54,22 @@
     "stats": {"hp": 100, "atk": 100, "def": 100, "spa": 100, "spd": 100, "spe": 100},
     "learnset":
     [{
-      "0":["SCRATCH","CUT"],
-      "7":["CUT"]
+      "0":["SCRATCH"]
     }],
-    "evolution":[{"method":"LEVEL","condition":36,"evolved":"CHARMELEON"}],
+    "tm":[
+      "DYNAMICPUNCH",
+      "HEADBUTT",
+      "CURSE",
+      "TOXIC",
+      "ROCKSMASH",
+      "HIDDENPOWER",
+      "RETURN"
+    ],
+    "hm":[
+      "CUT",
+      "STRENGTH"
+    ],
+    "evolution":[{"method":"LEVEL","condition":16,"evolved":"CHARMELEON"}],
     "egg_yield":"CHARMANDER",
     "egg_group":["MONSTER"],
     "gender_ratio":"MALE_75%",

@@ -30,6 +30,7 @@ def call_title_sequence():
     print('Start title screen')
     title_screen = AnimatedTitle()
     exit = False
+    musicsys.load_song("PkmGS-Title")
     while not exit:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:

@@ -366,6 +366,9 @@ class Map:
                 else:
                     auto_trigger = AutoTrigger(obj.properties['script'], 0, obj.properties)
                 self.obj_list.append(auto_trigger)
+            elif obj.type == "item":
+                item_ball = ItemBall(obj.x, obj.y, obj.properties['item'], obj.properties['amount'], obj.properties['hidden'])
+                self.obj_list.append(item_ball)
 
     def load_map_border(self):
         self.tile_border_img = pygame.Surface((64,64))
@@ -1153,6 +1156,25 @@ class AutoTrigger:
             self.behavior.run()
             activate_flag(flag)
         del self
+
+
+class ItemBall:
+    def __init__(self, x, y, item, amount, hidden):
+        self.x = x
+        self.y = y
+        self.type = "itemball"
+        self.item = item
+        self.amount = amount
+        self.hidden = hidden
+
+    def interact(self):
+        pass
+
+    def update(self):
+        pass
+
+    def draw(self):
+        pass
 
 
 def check_flag(flag):

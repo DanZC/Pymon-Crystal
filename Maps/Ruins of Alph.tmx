@@ -6,16 +6,14 @@
   <property name="encounter" value="test"/>
   <property name="map_flag_amount" type="int" value="1"/>
   <property name="map_var_amount" type="int" value="0"/>
-  <property name="music" value="PkmGS-Cherrygrove"/>
+  <property name="music" type="file" value="../Music/PkmGS-Cave2.ogg"/>
   <property name="outside" type="bool" value="true"/>
   <property name="region_number" type="int" value="0"/>
   <property name="region_size" value="1"/>
   <property name="region_x" type="int" value="8"/>
   <property name="region_y" type="int" value="6"/>
-  <property name="tile_border" value="0,0:8,8"/>
  </properties>
  <tileset firstgid="1" source="../Tilesets/GSC johto day.tsx"/>
- <tileset firstgid="1545" source="../Tilesets/cuttree-b.tsx"/>
  <layer name="TileMap" width="20" height="38">
   <data encoding="csv">
 1,1,1,1,1,1,6,6,6,6,1,1,1,1,1,1,1,1,1,1,
