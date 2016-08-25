@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.0" orientation="orthogonal" renderorder="right-down" width="22" height="16" tilewidth="32" tileheight="32" backgroundcolor="#00000000" nextobjectid="7">
+<map version="1.0" orientation="orthogonal" renderorder="right-down" width="22" height="16" tilewidth="32" tileheight="32" backgroundcolor="#000000" nextobjectid="7">
  <properties>
   <property name="c_left_offset" type="int" value="0"/>
   <property name="connection_left" value="Route 29"/>

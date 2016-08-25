@@ -118,6 +118,14 @@
     "accuracy":100,
     "effect":{"type":"SINGLE_HIT"}
   },
+  {"name":"WHIRLWIND",
+    "type":"FLYING",
+    "pp":20,
+    "power":0,
+    "accuracy":100,
+    "priority":-1,
+    "effect":{"type":"FORCE_OUT"}
+  },
   {"name":"FLY",
     "type":"FLYING",
     "pp":15,

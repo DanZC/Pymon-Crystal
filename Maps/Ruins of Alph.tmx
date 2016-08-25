@@ -3,50 +3,17 @@
  <properties>
   <property name="c_left_offset" type="int" value="0"/>
   <property name="connection_left" value="testc"/>
-  <property name="encounter" type="file" value="../Encounters/Route 29.json"/>
+  <property name="encounter" value="test"/>
   <property name="map_flag_amount" type="int" value="1"/>
   <property name="map_var_amount" type="int" value="0"/>
-  <property name="music" value="PkmGS-Cherrygrove"/>
+  <property name="music" type="file" value="../Music/PkmGS-Cave2.ogg"/>
   <property name="outside" type="bool" value="true"/>
   <property name="region_number" type="int" value="0"/>
   <property name="region_size" value="1"/>
   <property name="region_x" type="int" value="8"/>
   <property name="region_y" type="int" value="6"/>
-  <property name="tile_border" value="0,0:8,8"/>
  </properties>
  <tileset firstgid="1" source="../Tilesets/GSC johto day.tsx"/>
- <tileset firstgid="1545" name="Sprites" tilewidth="128" tileheight="128" tilecount="10" columns="0">
-  <tile id="0">
-   <image width="128" height="128" source="../Player/Male/Gold.png"/>
-  </tile>
-  <tile id="1">
-   <image width="128" height="128" source="../Player/Male/Gold-onbike.png"/>
-  </tile>
-  <tile id="2">
-   <image width="128" height="128" source="../Player/Female/Crystal.png"/>
-  </tile>
-  <tile id="3">
-   <image width="128" height="128" source="../Player/Female/Crystal-onbike.png"/>
-  </tile>
-  <tile id="4">
-   <image width="128" height="128" source="../Player/surf.png"/>
-  </tile>
-  <tile id="5">
-   <image width="128" height="128" source="../Sprites/char_ 42_A.png"/>
-  </tile>
-  <tile id="6">
-   <image width="128" height="128" source="../Sprites/Silver.png"/>
-  </tile>
-  <tile id="7">
-   <image width="128" height="128" source="../Sprites/NPC 30.png"/>
-  </tile>
-  <tile id="8">
-   <image width="128" height="128" source="../Sprites/char_ 44_D.png"/>
-  </tile>
-  <tile id="9">
-   <image width="128" height="128" source="../Player/Male/Gold-onbike.png"/>
-  </tile>
- </tileset>
  <layer name="TileMap" width="20" height="38">
   <data encoding="csv">
 1,1,1,1,1,1,6,6,6,6,1,1,1,1,1,1,1,1,1,1,
