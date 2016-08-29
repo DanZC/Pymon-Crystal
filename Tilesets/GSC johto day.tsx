@@ -617,7 +617,7 @@
  <tile id="101">
   <properties>
    <property name="isAnimated" value="False"/>
-   <property name="isWalkable" type="bool" value="false"/>
+   <property name="isWalkable" type="bool" value="true"/>
   </properties>
  </tile>
  <tile id="102">
@@ -1819,6 +1819,12 @@
    <property name="isAnimated" value="False"/>
    <property name="isWalkable" type="bool" value="false"/>
   </properties>
+  <animation>
+   <frame tileid="301" duration="100"/>
+   <frame tileid="406" duration="100"/>
+   <frame tileid="407" duration="100"/>
+   <frame tileid="414" duration="100"/>
+  </animation>
  </tile>
  <tile id="302">
   <properties>
