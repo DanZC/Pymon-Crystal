@@ -1831,6 +1831,12 @@
    <property name="isAnimated" value="False"/>
    <property name="isWalkable" type="bool" value="false"/>
   </properties>
+  <animation>
+   <frame tileid="302" duration="100"/>
+   <frame tileid="422" duration="100"/>
+   <frame tileid="423" duration="100"/>
+   <frame tileid="430" duration="100"/>
+  </animation>
  </tile>
  <tile id="303">
   <properties>
@@ -1873,12 +1879,24 @@
    <property name="isAnimated" value="False"/>
    <property name="isWalkable" type="bool" value="false"/>
   </properties>
+  <animation>
+   <frame tileid="309" duration="100"/>
+   <frame tileid="438" duration="100"/>
+   <frame tileid="439" duration="100"/>
+   <frame tileid="446" duration="100"/>
+  </animation>
  </tile>
  <tile id="310">
   <properties>
    <property name="isAnimated" value="False"/>
    <property name="isWalkable" type="bool" value="false"/>
   </properties>
+  <animation>
+   <frame tileid="310" duration="100"/>
+   <frame tileid="454" duration="100"/>
+   <frame tileid="455" duration="100"/>
+   <frame tileid="462" duration="100"/>
+  </animation>
  </tile>
  <tile id="311">
   <properties>

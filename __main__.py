@@ -14,6 +14,11 @@ import datetime
 import types
 import asyncio
 from import_file import import_file
+import pymon
+import pymon.project as project
+import pymon.engine as engine
+
+project.init()
 
 
 # def get_path(relative_path):
@@ -60,6 +65,10 @@ map = None
 song = None
 
 print('Setting up...')
+
+
+def end_frame():
+    clock.tick(fps)
 
 
 class Song:
