@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.0" orientation="orthogonal" renderorder="right-down" width="20" height="38" tilewidth="32" tileheight="32" backgroundcolor="#000000" nextobjectid="20">
+<map version="1.0" orientation="orthogonal" renderorder="right-down" width="20" height="38" tilewidth="32" tileheight="32" backgroundcolor="#000000" nextobjectid="4">
  <properties>
   <property name="c_left_offset" type="int" value="0"/>
   <property name="connection_left" value="testc"/>
@@ -62,7 +62,7 @@
     <property name="text" value="THIS IS A SIGN"/>
    </properties>
   </object>
-  <object id="8" type="door" x="448" y="224" width="32" height="32">
+  <object id="2" type="door" x="448" y="224" width="32" height="32">
    <properties>
     <property name="dest_map" value="testi"/>
     <property name="dest_x" type="float" value="96"/>
@@ -70,7 +70,7 @@
     <property name="warp_type" value="enter"/>
    </properties>
   </object>
-  <object id="10" type="door" x="544" y="352" width="32" height="32">
+  <object id="3" type="door" x="544" y="352" width="32" height="32">
    <properties>
     <property name="dest_map" value="testi_2"/>
     <property name="dest_x" type="float" value="96"/>

@@ -15,7 +15,6 @@
   <property name="tile_border" value="0,0:8,8"/>
  </properties>
  <tileset firstgid="1" source="../Tilesets/GSC johto day.tsx"/>
- <tileset firstgid="1545" source="../Tilesets/cuttree-b.tsx"/>
  <layer name="TileMap" width="30" height="36">
   <data encoding="csv">
 1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,27,27,1,1,1,1,1,1,

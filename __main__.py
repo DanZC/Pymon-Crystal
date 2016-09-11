@@ -14,6 +14,11 @@ import datetime
 import types
 import asyncio
 from import_file import import_file
+import pymon
+import pymon.project as project
+import pymon.engine as engine
+
+project.init()
 
 
 # def get_path(relative_path):
@@ -31,9 +36,9 @@ loop = asyncio.get_event_loop()
 
 
 pygame.init()
-pygame.mixer.init(frequency=44100, size=-16, channels=4, buffer=40960)
+pygame.mixer.init(frequency=44100, size=-16, channels=4, buffer=4096)
 music = pygame.mixer.music
-music.set_volume(0.5)
+music.set_volume(0)
 pygame.font.init()
 Time = pygame.time
 clock = pygame.time.Clock()
@@ -62,11 +67,16 @@ song = None
 print('Setting up...')
 
 
+def end_frame():
+    clock.tick(fps)
+
+
 class Song:
-    def __init__(self, name, file_ext = ".ogg"):
-        music.load(music_dir + name + file_ext)
+    def __init__(self, path):
+        full_path = map_dir + path
+        music.load(full_path)
         try:
-            with open(music_dir + name + ".json") as json_data:
+            with open(full_path + ".json") as json_data:
                 data = json.load(json_data)
         except:
             data = {"start":0, "loop_start":0, "loop_end":10000000000}
@@ -81,7 +91,6 @@ class MusicSystem:
     def __init__(self):
         self.song = Song('test')
         self.pos = self.song.start
-        self.queue = 'test'
         self.clock = pygame.time.Clock()
         self.paused = False
         music.stop()
@@ -90,18 +99,18 @@ class MusicSystem:
         #self.ext = '.ogg'
         self.change_track = False
 
-    def load_song(self, name, file_ext = ".ogg"):
-        self.title = name
-        self.song = Song(name, file_ext)
+    def load_song(self, path):
+        self.title = path
+        self.song = Song(path)
 
     def load_queue(self):
         if len(self.queue) > 0:
             new_song = self.queue.pop(0)
-            self.load_song(new_song['name'],new_song['ext'])
+            self.load_song(new_song['path'])
             self.play()
 
     def clear_queue(self):
-        self.queue = []
+        self.queue.clear()
 
     def play(self):
         music.play(-1, 0)
@@ -117,21 +126,18 @@ class MusicSystem:
     def fadeout(self, time):
         music.fadeout(time)
 
-    def enqueue(self, name, file_ext= ".ogg"):
-        dict_s = {"name":name, "ext":file_ext}
-        self.queue.append(dict_s)
+    def enqueue(self, path):
+        self.queue.append(path)
 
-    def fade_to(self, name, time, ext='.ogg'):
+    def fade_to(self, path, time):
         self.fadeout(time)
-        self.title = name
-        self.ext = ext
-        self.enqueue(name, ext)
+        self.title = path
+        self.enqueue(path)
 
-    def swap(self, name, ext = '.ogg'):
+    def swap(self, path):
         music.stop()
         self.clear_queue()
-        self.title = name
-        self.song = Song(name, ext)
+        self.song = Song(path)
         self.play()
 
     def update(self):

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.0" orientation="orthogonal" renderorder="right-down" width="24" height="28" tilewidth="32" tileheight="32" backgroundcolor="#000000" nextobjectid="24">
+<map version="1.0" orientation="orthogonal" renderorder="right-down" width="24" height="28" tilewidth="32" tileheight="32" backgroundcolor="#000000" nextobjectid="6">
  <properties>
   <property name="c_left_offset" type="int" value="0"/>
   <property name="connection_left" value="testc"/>
@@ -52,12 +52,12 @@
 </data>
  </layer>
  <objectgroup name="Events">
-  <object id="1" type="signpost" x="384" y="320" width="32" height="32">
+  <object id="0" type="signpost" x="384" y="320" width="32" height="32">
    <properties>
     <property name="text" value="THIS IS A SIGN"/>
    </properties>
   </object>
-  <object id="8" type="door" x="320" y="288" width="64" height="32">
+  <object id="1" type="door" x="320" y="288" width="64" height="32">
    <properties>
     <property name="dest_map" value="testi"/>
     <property name="dest_x" type="float" value="96"/>
@@ -65,13 +65,13 @@
     <property name="warp_type" value="enter"/>
    </properties>
   </object>
-  <object id="9" type="trigger" x="320" y="640" width="64" height="32">
+  <object id="2" type="trigger" x="320" y="640" width="64" height="32">
    <properties>
     <property name="behavior" value=""/>
     <property name="flag" value="82"/>
    </properties>
   </object>
-  <object id="10" type="door" x="320" y="704" width="64" height="32">
+  <object id="3" type="door" x="320" y="704" width="64" height="32">
    <properties>
     <property name="dest_map" value="testi_2"/>
     <property name="dest_x" type="float" value="96"/>
@@ -79,8 +79,8 @@
     <property name="warp_type" value="enter"/>
    </properties>
   </object>
-  <object id="20" type="tree" gid="1545" x="608" y="384" width="32" height="32"/>
-  <object id="22" type="NPC" gid="1561" x="512" y="608" width="32" height="32"/>
+  <object id="4" type="tree" gid="1545" x="608" y="384" width="32" height="32"/>
+  <object id="5" type="NPC" gid="1561" x="512" y="608" width="32" height="32"/>
  </objectgroup>
  <layer name="Border" width="2" height="2" offsetx="-64" offsety="-64">
   <data encoding="csv">
